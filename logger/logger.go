@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"text/template"
 	"time"
-	"github.com/beego/bee/logger/colors"
+	"github/Guazi-inc/seed/logger/color"
 )
 
 var errInvalidLogLevel = errors.New("logger: invalid log level")
