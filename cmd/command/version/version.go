@@ -11,8 +11,8 @@ import (
 	"strings"
 	"gopkg.in/yaml.v2"
 	"github/Guazi-inc/seed/logger"
-	"github/Guazi-inc/seed/cmd"
 	"github/Guazi-inc/seed/logger/color"
+	"github/Guazi-inc/seed/cmd/command"
 )
 
 const verboseVersionBanner string = `%s%s______
@@ -38,6 +38,9 @@ ____________   ___
 | ___ \ / _ \ / _ \
 | |_/ /|  __/|  __/
 \____/  \___| \___| v{{ .BeeVersion }}
+
+ ___
+/___\
 `
 
 var CmdVersion = &commands.Command{
