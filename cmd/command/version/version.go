@@ -29,7 +29,7 @@ const verboseVersionBanner string = `%s%s seed v{{ .SeedVersion }}%s
 └── Date      : {{ Now "Monday, 2 Jan 2006" }}%s
 `
 
-const shortVersionBanner = `v{{ .SeedVersion }} \n`
+const shortVersionBanner = `v{{ .SeedVersion }}`
 
 var CmdVersion = &commands.Command{
 	UsageLine: "version",

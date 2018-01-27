@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"github/Guazi-inc/seed/cmd/command"
-	"github/Guazi-inc/seed/cmd/command/version"
 	"github/Guazi-inc/seed/logger"
 	"github/Guazi-inc/seed/utils"
 	"io/ioutil"
@@ -25,8 +24,7 @@ var CmdHttptest = &commands.Command{
 	Long: `
 Run http server fot test,this server will supervise the filesystem of the application for any changes, and recompile/restart it.
 `,
-	PreRun: func(cmd *commands.Command, args []string) { version.ShowShortVersionBanner() },
-	Run:    RunHttptest,
+	Run: RunHttptest,
 }
 
 var (
