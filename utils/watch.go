@@ -1,12 +1,10 @@
 package utils
 
 import (
-	"github/Guazi-inc/seed/logger"
-	"github/Guazi-inc/seed/logger/color"
-
+	"github.com/Guazi-inc/seed/logger"
+	"github.com/Guazi-inc/seed/logger/color"
 	"regexp"
 	"strings"
-
 	"github.com/fsnotify/fsnotify"
 )
 

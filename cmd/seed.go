@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github/Guazi-inc/seed/cmd/command"
-	_ "github/Guazi-inc/seed/cmd/command/httptest"
-	_ "github/Guazi-inc/seed/cmd/command/new"
-	_ "github/Guazi-inc/seed/cmd/command/version"
-	"github/Guazi-inc/seed/utils"
+	"github.com/Guazi-inc/seed/cmd/command"
+	_ "github.com/Guazi-inc/seed/cmd/command/httptest"
+	_ "github.com/Guazi-inc/seed/cmd/command/new"
+	_ "github.com/Guazi-inc/seed/cmd/command/version"
+	"github.com/Guazi-inc/seed/utils"
 )
 
 var usageTemplate = `seed is a Fast  tool for managing your project.

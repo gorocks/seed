@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"text/template"
 	"time"
-	"github/Guazi-inc/seed/logger"
+	"github.com/Guazi-inc/seed/logger"
 )
 
 // RuntimeInfo holds information about the current runtime.

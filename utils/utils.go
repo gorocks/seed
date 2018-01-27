@@ -26,8 +26,8 @@ import (
 	"text/template"
 	"time"
 	"unicode"
-	"github/Guazi-inc/seed/logger"
-	"github/Guazi-inc/seed/logger/color"
+	"github.com/Guazi-inc/seed/logger"
+	"github.com/Guazi-inc/seed/logger/color"
 )
 
 // Go is a basic promise implementation: it wraps calls a function in a goroutine

@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github/Guazi-inc/seed/logger/color"
-	"github/Guazi-inc/seed/utils"
+	"github.com/Guazi-inc/seed/logger/color"
+	"github.com/Guazi-inc/seed/utils"
 )
 
 // Command is the unit of execution

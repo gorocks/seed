@@ -3,7 +3,7 @@ package logger
 import (
 	"errors"
 	"fmt"
-	"github/Guazi-inc/seed/logger/color"
+	"github.com/Guazi-inc/seed/logger/color"
 	"io"
 	"os"
 	"path/filepath"

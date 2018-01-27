@@ -4,9 +4,9 @@ import (
 	"flag"
 	"log"
 	"os"
-	"github/Guazi-inc/seed/cmd"
-	"github/Guazi-inc/seed/cmd/command"
-	"github/Guazi-inc/seed/utils"
+	"github.com/Guazi-inc/seed/cmd"
+	"github.com/Guazi-inc/seed/cmd/command"
+	"github.com/Guazi-inc/seed/utils"
 )
 
 func main() {
