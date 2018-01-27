@@ -88,7 +88,7 @@ func main() {
 var cmdGrpcserverMain = `package main
 
 import (
-	"golang.guazi-corp.com/finance/{{.Appname}}/service/preaudit"
+	"golang.guazi-corp.com/{{.GroupName}}/{{.Appname}}/service/preaudit"
 	"golang.guazi-corp.com/finance/go-common/config"
 	"golang.guazi-corp.com/znkf/common/server"
 	"google.golang.org/grpc"
