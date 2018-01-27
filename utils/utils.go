@@ -1,4 +1,4 @@
-// Copyright 2013 bee authors
+// Copyright 2013 Seed authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -17,12 +17,10 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 	"text/template"
@@ -63,46 +61,6 @@ func IsInGOPATH(thePath string) bool {
 		if strings.Contains(thePath, filepath.Join(gopath, "src")) {
 			return true
 		}
-	}
-	return false
-}
-
-// IsBeegoProject checks whether the current path is a Beego application or not
-func IsBeegoProject(thePath string) bool {
-	mainFiles := []string{}
-	hasBeegoRegex := regexp.MustCompile(`(?s)package main.*?import.*?\(.*?github.com/astaxie/beego".*?\).*func main()`)
-	c := make(chan error)
-	// Walk the application path tree to look for main files.
-	// Main files must satisfy the 'hasBeegoRegex' regular expression.
-	go func() {
-		filepath.Walk(thePath, func(fpath string, f os.FileInfo, err error) error {
-			if err != nil {
-				return nil
-			}
-			// Skip sub-directories
-			if !f.IsDir() {
-				var data []byte
-				data, err = ioutil.ReadFile(fpath)
-				if err != nil {
-					c <- err
-					return nil
-				}
-
-				if len(hasBeegoRegex.Find(data)) > 0 {
-					mainFiles = append(mainFiles, fpath)
-				}
-			}
-			return nil
-		})
-		close(c)
-	}()
-
-	if err := <-c; err != nil {
-		logger.Log.Fatalf("Unable to walk '%s' tree: %s", thePath, err)
-	}
-
-	if len(mainFiles) > 0 {
-		return true
 	}
 	return false
 }
@@ -260,8 +218,8 @@ func LINE() int {
 	return line
 }
 
-// BeeFuncMap returns a FuncMap of functions used in different templates.
-func BeeFuncMap() template.FuncMap {
+// SeedFuncMap returns a FuncMap of functions used in different templates.
+func SeedFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"trim":       strings.TrimSpace,
 		"bold":       colors.Bold,
@@ -274,7 +232,7 @@ func BeeFuncMap() template.FuncMap {
 
 // TmplToString parses a text template and return the result as a string.
 func TmplToString(tmpl string, data interface{}) string {
-	t := template.New("tmpl").Funcs(BeeFuncMap())
+	t := template.New("tmpl").Funcs(SeedFuncMap())
 	template.Must(t.Parse(tmpl))
 
 	var doc bytes.Buffer
@@ -292,7 +250,7 @@ func EndLine() string {
 func Tmpl(text string, data interface{}) {
 	output := colors.NewColorWriter(os.Stderr)
 
-	t := template.New("Usage").Funcs(BeeFuncMap())
+	t := template.New("Usage").Funcs(SeedFuncMap())
 	template.Must(t.Parse(text))
 
 	err := t.Execute(output, data)

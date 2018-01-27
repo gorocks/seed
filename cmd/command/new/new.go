@@ -397,7 +397,7 @@ func CreateApp(cmd *commands.Command, args []string) int {
 	os.Mkdir(path.Join(apppath, "fixtures"), 0755)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "fixtures")+string(path.Separator), "\x1b[0m")
 
-	os.Mkdir(path.Join(apppath, "apply"), 0755)
+	os.Mkdir(path.Join(apppath, "fixtures","apply"), 0755)
 	utils.WriteToFile(path.Join(apppath, "fixtures", "apply", "user.yml"), fixturesApplyUser)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "apply","user.yml")+string(path.Separator), "\x1b[0m")
 
