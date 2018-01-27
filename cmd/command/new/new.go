@@ -348,7 +348,7 @@ func init() {
 }
 
 func CreateApp(cmd *commands.Command, args []string) int {
-	output := cmd.Out()
+
 	if len(args) != 1 {
 		logger.Log.Fatal("Argument [appname] is missing")
 	}
@@ -367,6 +367,11 @@ func CreateApp(cmd *commands.Command, args []string) int {
 	}
 
 	logger.Log.Info("Creating application...")
+	return CreateGolangApp(cmd,apppath,packpath)
+}
+
+func CreateGolangApp(cmd *commands.Command,apppath, packpath string)int{
+	output := cmd.Out()
 	//创建工程总文件夹
 	os.MkdirAll(apppath, 0755)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", apppath+string(path.Separator), "\x1b[0m")
