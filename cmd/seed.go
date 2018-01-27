@@ -38,7 +38,7 @@ Use {{"seed help [topic]" | bold}} for more information about that topic.
 `
 
 var helpTemplate = `{{"USAGE" | headline}}
-  {{.UsageLine | printf "bee %s" | bold}}
+  {{.UsageLine | printf "Seed %s" | bold}}
 {{if .Options}}{{endline}}{{"OPTIONS" | headline}}{{range $k,$v := .Options}}
   {{$k | printf "-%s" | bold}}
       {{$v}}
@@ -47,7 +47,7 @@ var helpTemplate = `{{"USAGE" | headline}}
   {{tmpltostr .Long . | trim}}
 `
 
-var ErrorTemplate = `bee: %s.
+var ErrorTemplate = `seed: %s.
 Use {{"seed help" | bold}} for more information.
 `
 
