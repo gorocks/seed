@@ -3,6 +3,7 @@ package logger
 import (
 	"errors"
 	"fmt"
+	"github/Guazi-inc/seed/logger/color"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,7 +11,6 @@ import (
 	"sync/atomic"
 	"text/template"
 	"time"
-	"github/Guazi-inc/seed/logger/color"
 )
 
 var errInvalidLogLevel = errors.New("logger: invalid log level")
@@ -28,15 +28,15 @@ const (
 
 var (
 	sequenceNo uint64
-	instance   *BeeLogger
+	instance   *Logger
 	once       sync.Once
 )
 var debugMode = os.Getenv("DEBUG_ENABLED") == "1"
 
 var logLevel = levelInfo
 
-// BeeLogger logs logging records to the specified io.Writer
-type BeeLogger struct {
+// Logger logs logging records to the specified io.Writer
+type Logger struct {
 	mu     sync.Mutex
 	output io.Writer
 }
@@ -51,16 +51,16 @@ type LogRecord struct {
 	LineNo   int
 }
 
-var Log = GetBeeLogger(os.Stdout)
+var Log = GetLogger(os.Stdout)
 
 var (
 	logRecordTemplate      *template.Template
 	debugLogRecordTemplate *template.Template
 )
 
-// GetBeeLogger initializes the logger instance with a NewColorWriter output
+// GetLogger initializes the logger instance with a NewColorWriter output
 // and returns a singleton
-func GetBeeLogger(w io.Writer) *BeeLogger {
+func GetLogger(w io.Writer) *Logger {
 	once.Do(func() {
 		var (
 			err             error
@@ -82,13 +82,13 @@ func GetBeeLogger(w io.Writer) *BeeLogger {
 			panic(err)
 		}
 
-		instance = &BeeLogger{output: colors.NewColorWriter(w)}
+		instance = &Logger{output: colors.NewColorWriter(w)}
 	})
 	return instance
 }
 
 // SetOutput sets the logger output destination
-func (l *BeeLogger) SetOutput(w io.Writer) {
+func (l *Logger) SetOutput(w io.Writer) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.output = colors.NewColorWriter(w)
@@ -104,7 +104,7 @@ func EndLine() string {
 	return "\n"
 }
 
-func (l *BeeLogger) getLevelTag(level int) string {
+func (l *Logger) getLevelTag(level int) string {
 	switch level {
 	case levelFatal:
 		return "FATAL   "
@@ -127,7 +127,7 @@ func (l *BeeLogger) getLevelTag(level int) string {
 	}
 }
 
-func (l *BeeLogger) getColorLevel(level int) string {
+func (l *Logger) getColorLevel(level int) string {
 	switch level {
 	case levelCritical:
 		return colors.RedBold(l.getLevelTag(level))
@@ -152,7 +152,7 @@ func (l *BeeLogger) getColorLevel(level int) string {
 
 // mustLog logs the message according to the specified level and arguments.
 // It panics in case of an error.
-func (l *BeeLogger) mustLog(level int, message string, args ...interface{}) {
+func (l *Logger) mustLog(level int, message string, args ...interface{}) {
 	if level > logLevel {
 		return
 	}
@@ -175,7 +175,7 @@ func (l *BeeLogger) mustLog(level int, message string, args ...interface{}) {
 
 // mustLogDebug logs a debug message only if debug mode
 // is enabled. i.e. DEBUG_ENABLED="1"
-func (l *BeeLogger) mustLogDebug(message string, file string, line int, args ...interface{}) {
+func (l *Logger) mustLogDebug(message string, file string, line int, args ...interface{}) {
 	if !debugMode {
 		return
 	}
@@ -198,83 +198,83 @@ func (l *BeeLogger) mustLogDebug(message string, file string, line int, args ...
 }
 
 // Debug outputs a debug log message
-func (l *BeeLogger) Debug(message string, file string, line int) {
+func (l *Logger) Debug(message string, file string, line int) {
 	l.mustLogDebug(message, file, line)
 }
 
 // Debugf outputs a formatted debug log message
-func (l *BeeLogger) Debugf(message string, file string, line int, vars ...interface{}) {
+func (l *Logger) Debugf(message string, file string, line int, vars ...interface{}) {
 	l.mustLogDebug(message, file, line, vars...)
 }
 
 // Info outputs an information log message
-func (l *BeeLogger) Info(message string) {
+func (l *Logger) Info(message string) {
 	l.mustLog(levelInfo, message)
 }
 
 // Infof outputs a formatted information log message
-func (l *BeeLogger) Infof(message string, vars ...interface{}) {
+func (l *Logger) Infof(message string, vars ...interface{}) {
 	l.mustLog(levelInfo, message, vars...)
 }
 
 // Warn outputs a warning log message
-func (l *BeeLogger) Warn(message string) {
+func (l *Logger) Warn(message string) {
 	l.mustLog(levelWarn, message)
 }
 
 // Warnf outputs a formatted warning log message
-func (l *BeeLogger) Warnf(message string, vars ...interface{}) {
+func (l *Logger) Warnf(message string, vars ...interface{}) {
 	l.mustLog(levelWarn, message, vars...)
 }
 
 // Error outputs an error log message
-func (l *BeeLogger) Error(message string) {
+func (l *Logger) Error(message string) {
 	l.mustLog(levelError, message)
 }
 
 // Errorf outputs a formatted error log message
-func (l *BeeLogger) Errorf(message string, vars ...interface{}) {
+func (l *Logger) Errorf(message string, vars ...interface{}) {
 	l.mustLog(levelError, message, vars...)
 }
 
 // Fatal outputs a fatal log message and exists
-func (l *BeeLogger) Fatal(message string) {
+func (l *Logger) Fatal(message string) {
 	l.mustLog(levelFatal, message)
 	os.Exit(255)
 }
 
 // Fatalf outputs a formatted log message and exists
-func (l *BeeLogger) Fatalf(message string, vars ...interface{}) {
+func (l *Logger) Fatalf(message string, vars ...interface{}) {
 	l.mustLog(levelFatal, message, vars...)
 	os.Exit(255)
 }
 
 // Success outputs a success log message
-func (l *BeeLogger) Success(message string) {
+func (l *Logger) Success(message string) {
 	l.mustLog(levelSuccess, message)
 }
 
 // Successf outputs a formatted success log message
-func (l *BeeLogger) Successf(message string, vars ...interface{}) {
+func (l *Logger) Successf(message string, vars ...interface{}) {
 	l.mustLog(levelSuccess, message, vars...)
 }
 
 // Hint outputs a hint log message
-func (l *BeeLogger) Hint(message string) {
+func (l *Logger) Hint(message string) {
 	l.mustLog(levelHint, message)
 }
 
 // Hintf outputs a formatted hint log message
-func (l *BeeLogger) Hintf(message string, vars ...interface{}) {
+func (l *Logger) Hintf(message string, vars ...interface{}) {
 	l.mustLog(levelHint, message, vars...)
 }
 
 // Critical outputs a critical log message
-func (l *BeeLogger) Critical(message string) {
+func (l *Logger) Critical(message string) {
 	l.mustLog(levelCritical, message)
 }
 
 // Criticalf outputs a formatted critical log message
-func (l *BeeLogger) Criticalf(message string, vars ...interface{}) {
+func (l *Logger) Criticalf(message string, vars ...interface{}) {
 	l.mustLog(levelCritical, message, vars...)
 }

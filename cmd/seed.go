@@ -1,23 +1,12 @@
 package cmd
 
 import (
+	"github/Guazi-inc/seed/cmd/command"
+	_ "github/Guazi-inc/seed/cmd/command/httptest"
 	_ "github/Guazi-inc/seed/cmd/command/new"
 	_ "github/Guazi-inc/seed/cmd/command/version"
 	"github/Guazi-inc/seed/utils"
-	"github/Guazi-inc/seed/cmd/command"
 )
-
-func IfGenerateDocs(name string, args []string) bool {
-	if name != "generate" {
-		return false
-	}
-	for _, a := range args {
-		if a == "docs" {
-			return true
-		}
-	}
-	return false
-}
 
 var usageTemplate = `seed is a Fast  tool for managing your project.
 
