@@ -22,19 +22,19 @@ func IfGenerateDocs(name string, args []string) bool {
 var usageTemplate = `seed is a Fast  tool for managing your project.
 
 {{"USAGE" | headline}}
-    {{"bee command [arguments]" | bold}}
+    {{"seed command [arguments]" | bold}}
 
 {{"AVAILABLE COMMANDS" | headline}}
 {{range .}}{{if .Runnable}}
     {{.Name | printf "%-11s" | bold}} {{.Short}}{{end}}{{end}}
 
-Use {{"bee help [command]" | bold}} for more information about a command.
+Use {{"seed help [command]" | bold}} for more information about a command.
 
 {{"ADDITIONAL HELP TOPICS" | headline}}
 {{range .}}{{if not .Runnable}}
     {{.Name | printf "%-11s"}} {{.Short}}{{end}}{{end}}
 
-Use {{"bee help [topic]" | bold}} for more information about that topic.
+Use {{"seed help [topic]" | bold}} for more information about that topic.
 `
 
 var helpTemplate = `{{"USAGE" | headline}}
@@ -48,7 +48,7 @@ var helpTemplate = `{{"USAGE" | headline}}
 `
 
 var ErrorTemplate = `bee: %s.
-Use {{"bee help" | bold}} for more information.
+Use {{"seed help" | bold}} for more information.
 `
 
 func Usage() {

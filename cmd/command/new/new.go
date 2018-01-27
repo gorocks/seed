@@ -112,6 +112,7 @@ func TestBeego(t *testing.T) {
 }
 
 `
+var indextpl = `asd`
 
 var controllers = `package controllers
 

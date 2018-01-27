@@ -15,14 +15,9 @@ import (
 	"github/Guazi-inc/seed/cmd/command"
 )
 
-const verboseVersionBanner string = `%s%s______
-| ___ \
-| |_/ /  ___   ___
-| ___ \ / _ \ / _ \
-| |_/ /|  __/|  __/
-\____/  \___| \___| v{{ .BeeVersion }}%s
+const verboseVersionBanner string = `%s%s seed v{{ .SeedVersion }}%s
 %s%s
-├── Beego     : {{ .BeegoVersion }}
+├── SeedVersion : {{ .SeedVersion }}
 ├── GoVersion : {{ .GoVersion }}
 ├── GOOS      : {{ .GOOS }}
 ├── GOARCH    : {{ .GOARCH }}
@@ -33,22 +28,12 @@ const verboseVersionBanner string = `%s%s______
 └── Date      : {{ Now "Monday, 2 Jan 2006" }}%s
 `
 
-const shortVersionBanner = ` 
-____________   ___
-| ___ \ / _ \ / _ \
-| |_/ /|  __/|  __/
-\____/  \___| \___| v{{ .BeeVersion }}
-
- ___
-/___\
-`
+const shortVersionBanner = `v{{ .BeeVersion }}`
 
 var CmdVersion = &commands.Command{
 	UsageLine: "version",
-	Short:     "Prints the current Bee version",
-	Long: `
-Prints the current Bee, Beego and Go version alongside the platform information.
-`,
+	Short:     "Prints the current Seed version",
+	Long: `Prints the current Seed and Go version alongside the platform information.`,
 	Run: versionCmd,
 }
 var outputFormat string
