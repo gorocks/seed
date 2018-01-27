@@ -22,26 +22,26 @@ Creates a Golang application for the given app name in the current directory.
   The command 'new' creates a folder named [appname] and generates the following structure:
 
             ├── {{"cmd"|foldername}}
-			│	  └──{{"consumer"|foldername}}
-            │     	   └── main.go
-            │	  └──{{"grpcserver"|foldername}}
-            │     	   └── main.go
+            │     └── {{"consumer"|foldername}}
+            │           └── main.go
+            │     └── {{"grpcserver"|foldername}}
+            │           └── main.go
             ├── {{"databases"|foldername}}
             │     └── init-tables.py
             │     └── init.sql
             ├── {{"fixtures"|foldername}}
-			│	  └──{{"apply"|foldername}}
-            │     	   └── user.yml
+            │     └── {{"apply"|foldername}}
+            │           └── user.yml
             ├── {{"med"|foldername}}
-            │     └── med.yml
+            │     └──  med.yml
             │     └── vars.yml
             ├── {{"model"|foldername}}
-			│	  └──{{"user"|foldername}}
-            │     	   └── user.go
-            │     	   └── user_test.go
+            │     └── {{"user"|foldername}}
+            │           └── user.go
+            │           └── user_test.go
             ├── {{"service"|foldername}}
-			│		└──{{"preaudit"|foldername}}
-            │     		 └── service.go
+            │     └── {{"preaudit"|foldername}}
+            │           └── service.go
             ├── .gitignore
             ├── .gitlab-ci.yml
             ├── README.md
@@ -377,21 +377,21 @@ func CreateApp(cmd *commands.Command, args []string) int {
 
 	os.Mkdir(path.Join(apppath, "cmd", "consumer"), 0755)
 	utils.WriteToFile(path.Join(apppath, "cmd", "consumer", "main.go"), cmdConsumerMain)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "cmd", "consumer")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "cmd", "consumer","main.go")+string(path.Separator), "\x1b[0m")
 
 	os.Mkdir(path.Join(apppath, "cmd", "grpcserver"), 0755)
 	utils.WriteToFile(path.Join(apppath, "cmd", "grpcserver", "main.go"), strings.Replace(cmdGrpcserverMain, "{{.Appname}}", packpath, -1))
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "cmd", "grpcserver")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "cmd", "grpcserver","main.go")+string(path.Separator), "\x1b[0m")
 
 	//创建databases目录及目录文件
 	os.Mkdir(path.Join(apppath, "databases"), 0755)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "databases")+string(path.Separator), "\x1b[0m")
 
 	utils.WriteToFile(path.Join(apppath, "databases", "init-tables.py"), initTables)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "init-tables.py")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "databases","init-tables.py")+string(path.Separator), "\x1b[0m")
 
 	utils.WriteToFile(path.Join(apppath, "databases", "init.sql"), initSql)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "init.sql")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "databases","init.sql")+string(path.Separator), "\x1b[0m")
 
 	//创建fixtures目录及目录文件
 	os.Mkdir(path.Join(apppath, "fixtures"), 0755)
@@ -399,17 +399,17 @@ func CreateApp(cmd *commands.Command, args []string) int {
 
 	os.Mkdir(path.Join(apppath, "fixtures","apply"), 0755)
 	utils.WriteToFile(path.Join(apppath, "fixtures", "apply", "user.yml"), fixturesApplyUser)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "apply","user.yml")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "fixtures","apply","user.yml")+string(path.Separator), "\x1b[0m")
 
 	//创建med目录及目录文件
 	os.Mkdir(path.Join(apppath, "med"), 0755)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "med")+string(path.Separator), "\x1b[0m")
 
 	utils.WriteToFile(path.Join(apppath, "med", "med.yml"), strings.Replace(medMed, "{{.Appname}}", packpath, -1))
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "med.yml")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "med","med.yml")+string(path.Separator), "\x1b[0m")
 
 	utils.WriteToFile(path.Join(apppath, "med", "vars.yml"), medVars)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "vars.yml")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "med","vars.yml")+string(path.Separator), "\x1b[0m")
 
 	//创建model目录及目录文件
 	os.Mkdir(path.Join(apppath, "model"), 0755)
@@ -417,10 +417,10 @@ func CreateApp(cmd *commands.Command, args []string) int {
 
 	os.Mkdir(path.Join(apppath, "model","user"), 0755)
 	utils.WriteToFile(path.Join(apppath, "model", "user", "user.go"), modelUser)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "user","user.go")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "model","user","user.go")+string(path.Separator), "\x1b[0m")
 
 	utils.WriteToFile(path.Join(apppath, "model", "user", "user_test.go"),modelUserTest)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "user","user_test.go")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "model","user","user_test.go")+string(path.Separator), "\x1b[0m")
 
 	//创建service目录及目录文件
 	os.Mkdir(path.Join(apppath, "service"), 0755)
@@ -428,7 +428,7 @@ func CreateApp(cmd *commands.Command, args []string) int {
 
 	os.Mkdir(path.Join(apppath, "service","preaudit"), 0755)
 	utils.WriteToFile(path.Join(apppath, "service", "preaudit", "service.go"), serverServer)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "preaudit","service.go")+string(path.Separator), "\x1b[0m")
+	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", path.Join(apppath, "service","preaudit","service.go")+string(path.Separator), "\x1b[0m")
 
 	//创建.gitignore
 	utils.WriteToFile(path.Join(apppath, ".gitignore"), gitignore)
