@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"log"
-	"os"
 	"github.com/Guazi-inc/seed/cmd"
 	"github.com/Guazi-inc/seed/cmd/command"
 	"github.com/Guazi-inc/seed/utils"
+	"log"
+	"os"
 )
 
 func main() {
