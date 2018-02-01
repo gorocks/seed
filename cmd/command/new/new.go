@@ -139,7 +139,7 @@ func createAllDir(cmd *commands.Command, filePath string) {
 	if utils.IsExist(filePath) {
 		return
 	}
-	os.MkdirAll(filePath, 0777)
+	os.MkdirAll(filePath, 0755)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", filePath+string(path.Separator), "\x1b[0m")
 }
 func writeFile(cmd *commands.Command, filePath string, content string) {
