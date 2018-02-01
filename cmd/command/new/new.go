@@ -102,8 +102,6 @@ func CreateFile(cmd *commands.Command, templatePath string, appPath string) int 
 						realPath := strings.Split(strings.Split(tempPath, template)[1], ".template")[0]
 						careateFile(cmd, appPath, realPath, string(data))
 					}
-				} else {
-					logger.Log.Warnf("%s is empty dir", tempPath)
 				}
 				return nil
 			})
@@ -131,10 +129,13 @@ func careateFile(cmd *commands.Command, templatePath, realPath string, content s
 	createAllDir(cmd, dir)
 	//创建文件
 	content = strings.Replace(strings.Replace(content, "{{.Appname}}", appName, -1), "{{.GroupName}}", groupName, -1)
-	writeFile(cmd, path.Join(dir, arr[len(arr)-1]), content)
+	writeFile(cmd, path.Join(dir, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
 }
 func createAllDir(cmd *commands.Command, filePath string) {
 	output := cmd.Out()
+	if utils.IsExist(filePath) {
+		return
+	}
 	os.MkdirAll(filePath, 0777)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", filePath+string(path.Separator), "\x1b[0m")
 }
