@@ -113,7 +113,7 @@ func CreateFile(cmd *commands.Command, templatePath string, appPath string) int 
 		}
 	}
 	if !isTruePath {
-		logger.Log.Fatalf("the path not find template ,path:%v", templatePath)
+		logger.Log.Fatalf("the path not find %s template ,path:%v", template, templatePath)
 	}
 	logger.Log.Success("New application successfully created!")
 	return 0
