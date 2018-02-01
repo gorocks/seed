@@ -28,7 +28,6 @@ Creates a  application for the given app name in the current directory.
 var (
 	appName   string
 	groupName string
-	style     string
 	template  string
 	tempPath  string
 )
@@ -37,8 +36,7 @@ func init() {
 	fs := flag.NewFlagSet("new", flag.ContinueOnError)
 	fs.StringVar(&appName, "n", "", "set a name for application")
 	fs.StringVar(&groupName, "g", "finance", "this application belong which group")
-	fs.StringVar(&style, "s", "grpc", "create application style")
-	fs.StringVar(&template, "tn", "eipis-apply", "use which template")
+	fs.StringVar(&template, "tn", "eipis-apply", "template name,use which template")
 	fs.StringVar(&tempPath, "tp", "", "template path")
 	CmdNew.Flag = *fs
 	commands.AvailableCommands = append(commands.AvailableCommands, CmdNew)
