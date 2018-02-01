@@ -72,8 +72,10 @@ func CreateApp(cmd *commands.Command, args []string) int {
 //创建文件
 func CreateFile(cmd *commands.Command, templatePath string, appPath string) int {
 	files, _ := ioutil.ReadDir(templatePath)
+	isTruePath := false
 	for _, fi := range files {
 		if fi.IsDir() && fi.Name() == template { //找到当前目录下名字为template的文件夹
+			isTruePath = true
 			//创建总项目目录
 			createAllDir(cmd, templatePath)
 			//遍历文件夹建立模板文件
@@ -109,6 +111,9 @@ func CreateFile(cmd *commands.Command, templatePath string, appPath string) int 
 			}
 			break
 		}
+	}
+	if !isTruePath {
+		logger.Log.Fatalf("the path not find template ,path:%v", templatePath)
 	}
 	logger.Log.Success("New application successfully created!")
 	return 0
