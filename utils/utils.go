@@ -177,9 +177,12 @@ func SeedFuncMap() template.FuncMap {
 		"bold":       colors.Bold,
 		"headline":   colors.MagentaBold,
 		"foldername": colors.RedBold,
-		"endline":    "/n",
+		"endline":    EndLine,
 		"tmpltostr":  TmplToString,
 	}
+}
+func EndLine() string {
+	return "\n"
 }
 
 // TmplToString parses a text template and return the result as a string.
