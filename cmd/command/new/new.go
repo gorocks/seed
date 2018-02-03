@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	path "path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/Guazi-inc/seed/cmd/command"
@@ -88,20 +87,8 @@ func CreateFile(cmd *commands.Command, templatePath string, appPath string) int 
 					if err != nil {
 						return err
 					}
-					//解析内容识别path部分，如果有path按照path进行文件层级建立，如果没有按照模板目录层级建立
-					reg, err := regexp.Compile(`^#path=.+\n`)
-					if err != nil {
-						return err
-					}
-					loc := reg.FindIndex(data)
-					if len(loc) > 0 { //存在自定义path
-						str := string(data)[loc[0]:loc[1]]
-						realPath := strings.Split(str, "=")[1]
-						careateFile(cmd, appPath, realPath, string(data)[loc[1]:])
-					} else {
-						realPath := strings.Split(strings.Split(tempPath, template)[1], ".template")[0]
-						careateFile(cmd, appPath, realPath, string(data))
-					}
+					realPath := strings.Split(strings.Split(tempPath, template)[1], ".template")[0]
+					careateFile(cmd, appPath, realPath, string(data))
 				}
 				return nil
 			})
@@ -134,6 +121,8 @@ func careateFile(cmd *commands.Command, templatePath, realPath string, content s
 	content = strings.Replace(strings.Replace(content, "{{.Appname}}", appName, -1), "{{.GroupName}}", groupName, -1)
 	writeFile(cmd, path.Join(dir, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
 }
+
+//create dir from path
 func createAllDir(cmd *commands.Command, filePath string) {
 	output := cmd.Out()
 	if utils.IsExist(filePath) {
@@ -142,6 +131,8 @@ func createAllDir(cmd *commands.Command, filePath string) {
 	os.MkdirAll(filePath, 0755)
 	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", filePath+string(path.Separator), "\x1b[0m")
 }
+
+//create file
 func writeFile(cmd *commands.Command, filePath string, content string) {
 	output := cmd.Out()
 	utils.WriteToFile(filePath, content)

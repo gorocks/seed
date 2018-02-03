@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/Guazi-inc/seed/cmd/command"
-	"github.com/Guazi-inc/seed/logger"
-	"github.com/Guazi-inc/seed/logger/color"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/Guazi-inc/seed/cmd/command"
+	"github.com/Guazi-inc/seed/logger"
+	"github.com/Guazi-inc/seed/logger/color"
 
 	"gopkg.in/yaml.v2"
 )
@@ -29,7 +30,8 @@ const verboseVersionBanner string = `%s%s seed v{{ .SeedVersion }}%s
 └── Date      : {{ Now "Monday, 2 Jan 2006" }}%s
 `
 
-const shortVersionBanner = `v{{ .SeedVersion }}`
+const shortVersionBanner = `seedVersion:{{ .SeedVersion }}
+`
 
 var CmdVersion = &commands.Command{
 	UsageLine: "version",

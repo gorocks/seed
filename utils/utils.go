@@ -1,17 +1,3 @@
-// Copyright 2013 Seed authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License"): you may
-// not use this file except in compliance with the License. You may obtain
-// a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-// License for the specific language governing permissions and limitations
-// under the License.
-
 package utils
 
 import (
@@ -26,19 +12,10 @@ import (
 	"text/template"
 	"time"
 	"unicode"
+
 	"github.com/Guazi-inc/seed/logger"
 	"github.com/Guazi-inc/seed/logger/color"
 )
-
-// Go is a basic promise implementation: it wraps calls a function in a goroutine
-// and returns a channel which will later return the function's return value.
-func Go(f func() error) chan error {
-	ch := make(chan error)
-	go func() {
-		ch <- f()
-	}()
-	return ch
-}
 
 // IsExist returns whether a file or directory exists.
 func IsExist(path string) bool {
@@ -48,11 +25,11 @@ func IsExist(path string) bool {
 
 // GetGOPATHs returns all paths in GOPATH variable.
 func GetGOPATHs() []string {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" && strings.Compare(runtime.Version(), "go1.8") >= 0 {
-		gopath = defaultGOPATH()
+	goPath := os.Getenv("GOPATH")
+	if goPath == "" && strings.Compare(runtime.Version(), "go1.8") >= 0 {
+		goPath = defaultGOPATH()
 	}
-	return filepath.SplitList(gopath)
+	return filepath.SplitList(goPath)
 }
 
 // IsInGOPATH checks whether the path is inside of any GOPATH or not
