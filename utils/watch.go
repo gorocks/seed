@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"github.com/Guazi-inc/seed/logger"
-	"github.com/Guazi-inc/seed/logger/color"
 	"regexp"
 	"strings"
+
+	"github.com/Guazi-inc/seed/logger"
+	"github.com/Guazi-inc/seed/logger/color"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -34,7 +35,6 @@ func NewWatcher(paths []string, files []string, do DoWatch) {
 		for {
 			select {
 			case e := <-watcher.Events:
-				// Skip ignored files
 				if shouldIgnoreFile(e.Name) {
 					continue
 				}

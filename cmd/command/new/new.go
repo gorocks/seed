@@ -16,10 +16,10 @@ import (
 )
 
 var CmdNew = &commands.Command{
-	UsageLine: "new -name=[appname]",
-	Short:     "Creates a Grpc Golang app",
+	UsageLine: "new -n=[appname] -tp=[template path]",
+	Short:     "Creates a  app for template",
 	Long: `
-Creates a  application for the given app name in the current directory.
+Creates a  application for the given app name and template in the current directory.
 `,
 	PreRun: func(cmd *commands.Command, args []string) { version.ShowShortVersionBanner() },
 	Run:    CreateApp,
@@ -65,18 +65,18 @@ func CreateApp(cmd *commands.Command, args []string) int {
 	}
 
 	logger.Log.Info("Creating application...")
-	return CreateFile(cmd, tempPath, appPath)
+	return CreateFile(tempPath, appPath)
 }
 
 //创建文件
-func CreateFile(cmd *commands.Command, templatePath string, appPath string) int {
+func CreateFile(templatePath string, appPath string) int {
 	files, _ := ioutil.ReadDir(templatePath)
 	isTruePath := false
 	for _, fi := range files {
 		if fi.IsDir() && fi.Name() == template { //找到当前目录下名字为template的文件夹
 			isTruePath = true
 			//创建总项目目录
-			createAllDir(cmd, templatePath)
+			createAllDir(templatePath)
 			//遍历文件夹建立模板文件
 			err := path.Walk(path.Join(templatePath, template), func(tempPath string, info os.FileInfo, err error) error {
 				if info == nil {
@@ -87,8 +87,8 @@ func CreateFile(cmd *commands.Command, templatePath string, appPath string) int 
 					if err != nil {
 						return err
 					}
-					realPath := strings.Split(strings.Split(tempPath, template)[1], ".template")[0]
-					careateFile(cmd, appPath, realPath, string(data))
+					realPath := strings.Split(strings.Split(tempPath, template)[1], ".tmpl")[0]
+					careateFile(appPath, realPath, string(data))
 				}
 				return nil
 			})
@@ -106,7 +106,7 @@ func CreateFile(cmd *commands.Command, templatePath string, appPath string) int 
 	return 0
 }
 
-func careateFile(cmd *commands.Command, templatePath, realPath string, content string) {
+func careateFile(templatePath, realPath string, content string) {
 	arr := strings.Split(realPath, "/")
 	dir := templatePath
 	for _, v := range arr[:len(arr)-1] {
@@ -116,25 +116,36 @@ func careateFile(cmd *commands.Command, templatePath, realPath string, content s
 		dir = path.Join(dir, v)
 	}
 	//创建文件需要目录
-	createAllDir(cmd, dir)
+	createAllDir(dir)
 	//创建文件
 	content = strings.Replace(strings.Replace(content, "{{.Appname}}", appName, -1), "{{.GroupName}}", groupName, -1)
-	writeFile(cmd, path.Join(dir, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
+	writeFile(path.Join(dir, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
 }
 
 //create dir from path
-func createAllDir(cmd *commands.Command, filePath string) {
-	output := cmd.Out()
+func createAllDir(filePath string) {
 	if utils.IsExist(filePath) {
 		return
 	}
-	os.MkdirAll(filePath, 0755)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", filePath+string(path.Separator), "\x1b[0m")
+	err := os.MkdirAll(filePath, 0755)
+	if err != nil {
+		logger.Log.Fatalf("fail create dir:%s ,err:%v", filePath, err)
+	}
+	logger.Log.Success(fmt.Sprintf("create dir:%v", filePath+string(path.Separator)))
 }
 
 //create file
-func writeFile(cmd *commands.Command, filePath string, content string) {
-	output := cmd.Out()
-	utils.WriteToFile(filePath, content)
-	fmt.Fprintf(output, "\t%s%screate%s\t %s%s\n", "\x1b[32m", "\x1b[1m", "\x1b[21m", filePath+string(path.Separator), "\x1b[0m")
+func writeFile(filePath string, content string) {
+	f, err := os.Create(filePath)
+	defer f.Close()
+	if err != nil {
+		logger.Log.Fatalf("fail create file %v,err:%v", filePath, err)
+	}
+	_, err = f.WriteString(content)
+	if err != nil {
+		logger.Log.Fatalf("fail create file  %v,err:%v", filePath, err)
+	}
+	//go fmt
+	utils.FormatSourceCode(filePath)
+	logger.Log.Success(fmt.Sprintf("create file:%v", filePath))
 }

@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"strings"
 	"text/template"
-	"time"
 	"unicode"
 
 	"github.com/Guazi-inc/seed/logger"
@@ -160,29 +159,6 @@ func FormatSourceCode(filename string) {
 	}
 }
 
-// CloseFile attempts to close the passed file
-// or panics with the actual error
-func CloseFile(f *os.File) {
-	err := f.Close()
-	MustCheck(err)
-}
-
-// MustCheck panics when the error is not nil
-func MustCheck(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-// WriteToFile creates a file and writes content to it
-func WriteToFile(filename, content string) {
-	f, err := os.Create(filename)
-	MustCheck(err)
-	defer CloseFile(f)
-	_, err = f.WriteString(content)
-	MustCheck(err)
-}
-
 // __FILE__ returns the file name in which the function was invoked
 func FILE() string {
 	_, file, _, _ := runtime.Caller(1)
@@ -195,33 +171,30 @@ func LINE() int {
 	return line
 }
 
-// SeedFuncMap returns a FuncMap of functions used in different templates.
 func SeedFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"trim":       strings.TrimSpace,
 		"bold":       colors.Bold,
 		"headline":   colors.MagentaBold,
 		"foldername": colors.RedBold,
-		"endline":    EndLine,
+		"endline":    "/n",
 		"tmpltostr":  TmplToString,
 	}
 }
 
 // TmplToString parses a text template and return the result as a string.
 func TmplToString(tmpl string, data interface{}) string {
+
 	t := template.New("tmpl").Funcs(SeedFuncMap())
 	template.Must(t.Parse(tmpl))
 
 	var doc bytes.Buffer
 	err := t.Execute(&doc, data)
-	MustCheck(err)
+	if err != nil {
+		logger.Log.Fatalf("Error while TmplToString: %s", err)
+	}
 
 	return doc.String()
-}
-
-// EndLine returns the a newline escape character
-func EndLine() string {
-	return "\n"
 }
 
 func Tmpl(text string, data interface{}) {
@@ -284,6 +257,34 @@ func GoCommand(command string, args ...string) error {
 	return goBuild.Run()
 }
 
+func Json2Str(jsonData string) string {
+	arr := make([]rune, 0)
+	isT := false
+	for _, v := range jsonData {
+		if v == int32(34) || v == int32(123) || v == int32(125) {
+			continue
+		}
+		if v == int32(58) {
+			v = int32(61)
+		}
+		if v == int32(44) {
+			v = int32(38)
+		}
+		if v == int32(92) {
+			isT = true
+		}
+		arr = append(arr, v)
+	}
+	str := string(arr)
+	//处理转义
+	if isT {
+		str = strings.Replace(str, `\u003c`, "<", -1)
+		str = strings.Replace(str, `\u003e`, ">", -1)
+		str = strings.Replace(str, `\u0026`, "&", -1)
+	}
+	return str
+}
+
 // SplitQuotedFields is like strings.Fields but ignores spaces
 // inside areas surrounded by single quotes.
 // To specify a single quote use backslash to escape it: '\''
@@ -339,25 +340,6 @@ func SplitQuotedFields(in string) []string {
 	}
 
 	return r
-}
-
-// GetFileModTime returns unix timestamp of `os.File.ModTime` for the given path.
-func GetFileModTime(path string) int64 {
-	path = strings.Replace(path, "\\", "/", -1)
-	f, err := os.Open(path)
-	if err != nil {
-		logger.Log.Errorf("Failed to open file on '%s': %s", path, err)
-		return time.Now().Unix()
-	}
-	defer f.Close()
-
-	fi, err := f.Stat()
-	if err != nil {
-		logger.Log.Errorf("Failed to get file stats: %s", err)
-		return time.Now().Unix()
-	}
-
-	return fi.ModTime().Unix()
 }
 
 func defaultGOPATH() string {

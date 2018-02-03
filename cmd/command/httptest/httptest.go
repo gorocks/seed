@@ -5,39 +5,43 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/Guazi-inc/seed/cmd/command"
-	"github.com/Guazi-inc/seed/logger"
-	"github.com/Guazi-inc/seed/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"time"
+
+	"github.com/Guazi-inc/seed/cmd/command"
+	"github.com/Guazi-inc/seed/cmd/command/version"
+	"github.com/Guazi-inc/seed/logger"
+	"github.com/Guazi-inc/seed/utils"
 )
 
-var jsonDataMap map[string]interface{}
-
 var CmdHttptest = &commands.Command{
-	UsageLine: "httptest",
+	UsageLine: "httptest -pkg=[test-fixtures path]",
 	Short:     "set up a http server for test",
 	Long: `
 Run http server fot test,this server will supervise the filesystem of the application for any changes, and recompile/restart it.
 `,
-	Run: RunHttptest,
+	PreRun: func(cmd *commands.Command, args []string) { version.ShowShortVersionBanner() },
+	Run:    RunHttptest,
 }
 
-var (
-	port  string
-	path  string
-	style string
-)
+type HttpJsonMock struct {
+	jsonDataMap  map[string]interface{}
+	port         string
+	fxituresPath string
+	style        string
+}
+
+var hm HttpJsonMock
 
 func init() {
 	fs := flag.NewFlagSet("httptest", flag.ContinueOnError)
-	fs.StringVar(&path, "pkg", "./test-fixtures", "test-fixtures path")
-	fs.StringVar(&port, "p", "8090", "local http server test port")
-	fs.StringVar(&style, "style", "json", "fixtures style")
+	fs.StringVar(&hm.fxituresPath, "pkg", "./test-fixtures", "test-fixtures path")
+	fs.StringVar(&hm.port, "p", "8090", "local http server test port")
+	fs.StringVar(&hm.style, "style", "json", "fixtures style")
 	CmdHttptest.Flag = *fs
 	commands.AvailableCommands = append(commands.AvailableCommands, CmdHttptest)
 }
@@ -46,65 +50,64 @@ func RunHttptest(cmd *commands.Command, args []string) int {
 	if err := cmd.Flag.Parse(args); err != nil {
 		logger.Log.Fatalf("Error while parsing flags: %v", err.Error())
 	}
-	filePath := path + "/" + style
+	filePath := hm.fxituresPath + "/" + hm.style
 	files, err := ioutil.ReadDir(filePath)
 	if err != nil {
-		logger.Log.Errorf("please use httptest -pkg to set fixtures path to fix err :%v", err)
-		return 1
+		logger.Log.Fatalf("please use httptest -pkg to set fixtures path to fix err :%v", err)
 	}
-	jsonDataMap = make(map[string]interface{}, len(files))
+	hm.jsonDataMap = make(map[string]interface{})
 	for _, v := range files {
-		ret, err := readFile(filePath + "/" + v.Name())
+		ret, err := readFileToMap(filePath + "/" + v.Name())
 		if err != nil {
 			logger.Log.Errorf("%s %v+", v.Name(), err)
 			continue
 		}
-		jsonDataMap[v.Name()] = ret
+		hm.jsonDataMap[v.Name()] = ret
 	}
-	var wt watcher
-	utils.NewWatcher([]string{filePath}, []string{}, wt)
-	//读取配置文件，获取端口号
+	utils.NewWatcher([]string{filePath}, []string{}, &hm)
+	hm.RunServer()
+	return 0
+}
+
+func (hm *HttpJsonMock) RunServer() {
 	stopChan := make(chan os.Signal)
 	signal.Notify(stopChan, os.Interrupt)
 
-	ports := fmt.Sprintf(":%s", port)
+	ports := fmt.Sprintf(":%s", hm.port)
 	srv := http.Server{Addr: ports}
-	http.HandleFunc("/", Handle)
+	http.HandleFunc("/", hm.Handle)
 	go func() {
 		logger.Log.Infof("http test server start at %s", ports)
 		if err := srv.ListenAndServe(); err != nil {
 			logger.Log.Infof("server listen: %s\n", err)
 		}
 	}()
-	<-stopChan // wait for SIGINT
+	<-stopChan
 	logger.Log.Info("Shutting down server...")
-	// shut down gracefully, but wait no longer than 5 seconds before halting
+
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	srv.Shutdown(ctx)
 	logger.Log.Info("Server gracefully stopped")
-	return 0
 }
 
-type watcher string
-
-func (wt watcher) Exec(paths []string, files []string, name string) {
-	temp, err := readFile(name)
+func (hm *HttpJsonMock) Exec(paths []string, files []string, name string) {
+	temp, err := readFileToMap(name)
 	if err != nil {
 		logger.Log.Errorf("exec err %v", err)
 	}
 	arr := strings.Split(name, "/")
 	str := arr[len(arr)-1]
-	jsonDataMap[str] = temp
+	hm.jsonDataMap[str] = temp
 	logger.Log.Infof("%s change and  save success", str)
 }
 
 //对请求进行处理
-func Handle(w http.ResponseWriter, r *http.Request) {
+func (hm *HttpJsonMock) Handle(w http.ResponseWriter, r *http.Request) {
 	var res map[string]interface{}
 	host, urlP := splitPath(r.URL.Path)
 	logger.Log.Infof("request path : %s", r.Method, host, urlP)
 	fileName := host + ".json"
-	if temp, ok := jsonDataMap[fileName]; ok {
+	if temp, ok := hm.jsonDataMap[fileName]; ok {
 		res = temp.(map[string]interface{})
 	} else {
 		logger.Log.Errorf("no %s exist", host)
@@ -127,7 +130,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 		arr = string(date)
 		if strings.Contains(arr, "{") { //认为是json请求，就拼凑请求中的内容
-			arr = json2Str(arr)
+			arr = utils.Json2Str(arr)
 		}
 	default:
 		w.Write([]byte("unsupported " + r.Method + " method"))
@@ -171,7 +174,7 @@ func jsonToResponse(w http.ResponseWriter, arr map[string]interface{}, keys stri
 			}
 		}
 		if isKey {
-			data, err := retMarshal(v)
+			data, err := httpCommonRet(v)
 			if err != nil {
 				panic(err)
 			}
@@ -183,7 +186,7 @@ func jsonToResponse(w http.ResponseWriter, arr map[string]interface{}, keys stri
 	logger.Log.Errorf("no match key,key should is : %v", keys)
 }
 
-func readFile(fileName string) (map[string]interface{}, error) {
+func readFileToMap(fileName string) (map[string]interface{}, error) {
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		logger.Log.Errorf("read file err: %v", err)
@@ -213,35 +216,7 @@ func splitPath(path string) (string, string) {
 	return s, p
 }
 
-func json2Str(jsonData string) string {
-	arr := make([]rune, 0)
-	isT := false
-	for _, v := range jsonData {
-		if v == int32(34) || v == int32(123) || v == int32(125) {
-			continue
-		}
-		if v == int32(58) {
-			v = int32(61)
-		}
-		if v == int32(44) {
-			v = int32(38)
-		}
-		if v == int32(92) {
-			isT = true
-		}
-		arr = append(arr, v)
-	}
-	str := string(arr)
-	//处理转义
-	if isT {
-		str = strings.Replace(str, `\u003c`, "<", -1)
-		str = strings.Replace(str, `\u003e`, ">", -1)
-		str = strings.Replace(str, `\u0026`, "&", -1)
-	}
-	return str
-}
-
-func retMarshal(s interface{}) ([]byte, error) {
+func httpCommonRet(s interface{}) ([]byte, error) {
 	date := map[string]interface{}{
 		"code":    0,
 		"message": "succeed",

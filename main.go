@@ -2,16 +2,15 @@ package main
 
 import (
 	"flag"
+	"log"
+	"os"
+
 	"github.com/Guazi-inc/seed/cmd"
 	"github.com/Guazi-inc/seed/cmd/command"
 	"github.com/Guazi-inc/seed/utils"
-	"log"
-	"os"
 )
 
 func main() {
-	//currentpath, _ := os.Getwd()
-
 	flag.Usage = cmd.Usage
 	flag.Parse()
 	log.SetFlags(0)
@@ -23,13 +22,12 @@ func main() {
 		os.Exit(2)
 		return
 	}
-
 	if args[0] == "help" {
 		cmd.Help(args[1:])
 		return
 	}
 	for _, c := range commands.AvailableCommands {
-		if c.Name() == args[0] && c.Run != nil {
+		if c.Name() == args[0] && c.Runnable() {
 			c.Flag.Usage = func() { c.Usage() }
 			if c.CustomFlags {
 				args = args[1:]
@@ -41,11 +39,6 @@ func main() {
 			if c.PreRun != nil {
 				c.PreRun(c, args)
 			}
-			//// Check if current directory is inside the GOPATH,
-			//// if so parse the packages inside it.
-			//if utils.IsInGOPATH(currentpath) && cmd.IfGenerateDocs(c.Name(), args) {
-			//	swaggergen.ParsePackagesFromDir(currentpath)
-			//}
 			os.Exit(c.Run(c, args))
 			return
 		}

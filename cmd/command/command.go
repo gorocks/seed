@@ -40,7 +40,7 @@ type Command struct {
 	output *io.Writer
 }
 
-var AvailableCommands = []*Command{}
+var AvailableCommands []*Command
 var cmdUsage = `Use {{printf "Seed help %s" .Name | bold}} for more information.{{endline}}`
 
 // Name returns the command's name: the first word in the Usage line.
