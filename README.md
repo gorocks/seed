@@ -3,28 +3,12 @@ seed
 
 seed is a command-line tool to quick start  application.
 
-## Requirements
-
-- Go version >= 1.3.
-
 ## Installation
 
 To install `seed` use the `go get` command:
 
 ```bash
 go get github.com/Guazi-inc/seed
-```
-
-Then you can add `seed` binary to PATH environment variable in your `~/.bashrc` or `~/.bash_profile` file:
-
-```bash
-export PATH=$PATH:<your_main_gopath>/bin
-```
-
-> If you already have `seed` installed, updating `seed` is simple:
-
-```bash
-go get -u github.com/Guazi-inc/seed
 ```
 
 ## Basic commands
@@ -44,8 +28,7 @@ To display the current version of `seed`, `seedgo` and `go` installed on your ma
 
 ```bash
 $ seed version
-seedVersion v0.0.1
-
+seedVersion:0.0.1
 ├── GoVersion : go1.9
 ├── GOOS      : linux
 ├── GOARCH    : amd64
@@ -63,7 +46,6 @@ To create a new seedgo web application:
 
 ```bash
 $ seed new my-web-app -tp="template/path"
-seedVersion v0.0.1
 seedVersion:0.0.1
 2018/02/03 14:32:52 INFO     ▶ 0001 Creating application...
 2018/02/03 14:32:52 SUCCESS  ▶ 0002 create dir:/go/src/github.com/Guazi-inc/seed/explame/
