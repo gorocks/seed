@@ -1,91 +1,35 @@
 package logger
 
 import (
-	"errors"
 	"fmt"
-	"github.com/Guazi-inc/seed/logger/color"
 	"io"
 	"os"
-	"path/filepath"
 	"sync"
-	"sync/atomic"
-	"text/template"
 	"time"
+
+	"github.com/Guazi-inc/seed/logger/color"
 )
 
-var errInvalidLogLevel = errors.New("logger: invalid log level")
-
 const (
-	levelDebug = iota
-	levelError
+	levelError = iota
 	levelFatal
-	levelCritical
 	levelSuccess
 	levelWarn
 	levelInfo
-	levelHint
 )
-
-var (
-	sequenceNo uint64
-	instance   *Logger
-	once       sync.Once
-)
-var debugMode = os.Getenv("DEBUG_ENABLED") == "1"
-
-var logLevel = levelInfo
 
 // Logger logs logging records to the specified io.Writer
 type Logger struct {
 	mu     sync.Mutex
 	output io.Writer
+	buf    []byte // for accumulating text to write
 }
 
-// LogRecord represents a log record and contains the timestamp when the record
-// was created, an increasing id, level and the actual formatted log line.
-type LogRecord struct {
-	ID       string
-	Level    string
-	Message  string
-	Filename string
-	LineNo   int
+func New(out io.Writer) *Logger {
+	return &Logger{output: out}
 }
 
-var Log = GetLogger(os.Stdout)
-
-var (
-	logRecordTemplate      *template.Template
-	debugLogRecordTemplate *template.Template
-)
-
-// GetLogger initializes the logger instance with a NewColorWriter output
-// and returns a singleton
-func GetLogger(w io.Writer) *Logger {
-	once.Do(func() {
-		var (
-			err             error
-			simpleLogFormat = `{{Now "2006/01/02 15:04:05"}} {{.Level}} ▶ {{.ID}} {{.Message}}{{EndLine}}`
-			debugLogFormat  = `{{Now "2006/01/02 15:04:05"}} {{.Level}} ▶ {{.ID}} {{.Filename}}:{{.LineNo}} {{.Message}}{{EndLine}}`
-		)
-
-		// Initialize and parse logging templates
-		funcs := template.FuncMap{
-			"Now":     Now,
-			"EndLine": EndLine,
-		}
-		logRecordTemplate, err = template.New("simpleLogFormat").Funcs(funcs).Parse(simpleLogFormat)
-		if err != nil {
-			panic(err)
-		}
-		debugLogRecordTemplate, err = template.New("debugLogFormat").Funcs(funcs).Parse(debugLogFormat)
-		if err != nil {
-			panic(err)
-		}
-
-		instance = &Logger{output: colors.NewColorWriter(w)}
-	})
-	return instance
-}
+var log = New(os.Stderr)
 
 // SetOutput sets the logger output destination
 func (l *Logger) SetOutput(w io.Writer) {
@@ -94,187 +38,121 @@ func (l *Logger) SetOutput(w io.Writer) {
 	l.output = colors.NewColorWriter(w)
 }
 
-// Now returns the current local time in the specified layout
-func Now(layout string) string {
-	return time.Now().Format(layout)
-}
-
-// EndLine returns the a newline escape character
-func EndLine() string {
-	return "\n"
-}
-
-func (l *Logger) getLevelTag(level int) string {
-	switch level {
-	case levelFatal:
-		return "FATAL   "
-	case levelSuccess:
-		return "SUCCESS "
-	case levelHint:
-		return "HINT    "
-	case levelDebug:
-		return "DEBUG   "
-	case levelInfo:
-		return "INFO    "
-	case levelWarn:
-		return "WARN    "
-	case levelError:
-		return "ERROR   "
-	case levelCritical:
-		return "CRITICAL"
-	default:
-		panic(errInvalidLogLevel)
-	}
-}
-
 func (l *Logger) getColorLevel(level int) string {
 	switch level {
-	case levelCritical:
-		return colors.RedBold(l.getLevelTag(level))
 	case levelFatal:
-		return colors.RedBold(l.getLevelTag(level))
+		return colors.RedBold("[FATAL]   ")
 	case levelInfo:
-		return colors.BlueBold(l.getLevelTag(level))
-	case levelHint:
-		return colors.CyanBold(l.getLevelTag(level))
-	case levelDebug:
-		return colors.YellowBold(l.getLevelTag(level))
+		return colors.BlueBold("[INFO]    ")
 	case levelError:
-		return colors.RedBold(l.getLevelTag(level))
+		return colors.RedBold("[ERROR]   ")
 	case levelWarn:
-		return colors.YellowBold(l.getLevelTag(level))
+		return colors.YellowBold("[WARN]    ")
 	case levelSuccess:
-		return colors.GreenBold(l.getLevelTag(level))
+		return colors.GreenBold("[SUCCESS] ")
 	default:
-		panic(errInvalidLogLevel)
+		panic("logger: invalid log level")
 	}
 }
 
-// mustLog logs the message according to the specified level and arguments.
-// It panics in case of an error.
-func (l *Logger) mustLog(level int, message string, args ...interface{}) {
-	if level > logLevel {
-		return
+func itoa(buf *[]byte, i int, wid int) {
+	// Assemble decimal in reverse order.
+	var b [20]byte
+	bp := len(b) - 1
+	for i >= 10 || wid > 1 {
+		wid--
+		q := i / 10
+		b[bp] = byte('0' + i - q*10)
+		bp--
+		i = q
 	}
-	// Acquire the lock
+	// i < 10
+	b[bp] = byte('0' + i)
+	*buf = append(*buf, b[bp:]...)
+}
+func (l *Logger) formatHeader(buf *[]byte, prefix string, t time.Time) {
+	year, month, day := t.Date()
+	itoa(buf, year, 4)
+	*buf = append(*buf, '/')
+	itoa(buf, int(month), 2)
+	*buf = append(*buf, '/')
+	itoa(buf, day, 2)
+	*buf = append(*buf, ' ')
+	//time
+	hour, min, sec := t.Clock()
+	itoa(buf, hour, 2)
+	*buf = append(*buf, ':')
+	itoa(buf, min, 2)
+	*buf = append(*buf, ':')
+	itoa(buf, sec, 2)
+	*buf = append(*buf, ' ')
+	//prefix level
+	*buf = append(*buf, prefix...)
+	*buf = append(*buf, ": "...)
+}
+
+func (l *Logger) Output(calldepth int, s string, level int) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-
-	// Create the logging record and pass into the output
-	record := LogRecord{
-		ID:      fmt.Sprintf("%04d", atomic.AddUint64(&sequenceNo, 1)),
-		Level:   l.getColorLevel(level),
-		Message: fmt.Sprintf(message, args...),
+	l.buf = l.buf[:0]
+	l.formatHeader(&l.buf, l.getColorLevel(level), time.Now())
+	l.buf = append(l.buf, s...)
+	if len(s) == 0 || s[len(s)-1] != '\n' {
+		l.buf = append(l.buf, '\n')
 	}
-
-	err := logRecordTemplate.Execute(l.output, record)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// mustLogDebug logs a debug message only if debug mode
-// is enabled. i.e. DEBUG_ENABLED="1"
-func (l *Logger) mustLogDebug(message string, file string, line int, args ...interface{}) {
-	if !debugMode {
-		return
-	}
-
-	// Change the output to Stderr
-	l.SetOutput(os.Stderr)
-
-	// Create the log record
-	record := LogRecord{
-		ID:       fmt.Sprintf("%04d", atomic.AddUint64(&sequenceNo, 1)),
-		Level:    l.getColorLevel(levelDebug),
-		Message:  fmt.Sprintf(message, args...),
-		LineNo:   line,
-		Filename: filepath.Base(file),
-	}
-	err := debugLogRecordTemplate.Execute(l.output, record)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// Debug outputs a debug log message
-func (l *Logger) Debug(message string, file string, line int) {
-	l.mustLogDebug(message, file, line)
-}
-
-// Debugf outputs a formatted debug log message
-func (l *Logger) Debugf(message string, file string, line int, vars ...interface{}) {
-	l.mustLogDebug(message, file, line, vars...)
+	_, err := l.output.Write(l.buf)
+	return err
 }
 
 // Info outputs an information log message
-func (l *Logger) Info(message string) {
-	l.mustLog(levelInfo, message)
+func Info(message string) {
+	log.Output(2, message, levelInfo)
 }
 
 // Infof outputs a formatted information log message
-func (l *Logger) Infof(message string, vars ...interface{}) {
-	l.mustLog(levelInfo, message, vars...)
+func Infof(message string, vars ...interface{}) {
+	log.Output(2, fmt.Sprintf(message, vars...), levelInfo)
 }
 
 // Warn outputs a warning log message
-func (l *Logger) Warn(message string) {
-	l.mustLog(levelWarn, message)
+func Warn(message string) {
+	log.Output(2, message, levelWarn)
 }
 
 // Warnf outputs a formatted warning log message
-func (l *Logger) Warnf(message string, vars ...interface{}) {
-	l.mustLog(levelWarn, message, vars...)
+func Warnf(message string, vars ...interface{}) {
+	log.Output(2, fmt.Sprintf(message, vars...), levelWarn)
 }
 
 // Error outputs an error log message
-func (l *Logger) Error(message string) {
-	l.mustLog(levelError, message)
+func Error(message string) {
+	log.Output(2, message, levelError)
 }
 
 // Errorf outputs a formatted error log message
-func (l *Logger) Errorf(message string, vars ...interface{}) {
-	l.mustLog(levelError, message, vars...)
+func Errorf(message string, vars ...interface{}) {
+	log.Output(2, fmt.Sprintf(message, vars...), levelError)
 }
 
 // Fatal outputs a fatal log message and exists
-func (l *Logger) Fatal(message string) {
-	l.mustLog(levelFatal, message)
+func Fatal(message string) {
+	log.Output(2, message, levelFatal)
 	os.Exit(255)
 }
 
 // Fatalf outputs a formatted log message and exists
-func (l *Logger) Fatalf(message string, vars ...interface{}) {
-	l.mustLog(levelFatal, message, vars...)
+func Fatalf(message string, vars ...interface{}) {
+	log.Output(2, fmt.Sprintf(message, vars...), levelFatal)
 	os.Exit(255)
 }
 
 // Success outputs a success log message
-func (l *Logger) Success(message string) {
-	l.mustLog(levelSuccess, message)
+func Success(message string) {
+	log.Output(2, message, levelSuccess)
+
 }
 
 // Successf outputs a formatted success log message
-func (l *Logger) Successf(message string, vars ...interface{}) {
-	l.mustLog(levelSuccess, message, vars...)
-}
-
-// Hint outputs a hint log message
-func (l *Logger) Hint(message string) {
-	l.mustLog(levelHint, message)
-}
-
-// Hintf outputs a formatted hint log message
-func (l *Logger) Hintf(message string, vars ...interface{}) {
-	l.mustLog(levelHint, message, vars...)
-}
-
-// Critical outputs a critical log message
-func (l *Logger) Critical(message string) {
-	l.mustLog(levelCritical, message)
-}
-
-// Criticalf outputs a formatted critical log message
-func (l *Logger) Criticalf(message string, vars ...interface{}) {
-	l.mustLog(levelCritical, message, vars...)
+func Successf(message string, vars ...interface{}) {
+	log.Output(2, fmt.Sprintf(message, vars...), levelSuccess)
 }

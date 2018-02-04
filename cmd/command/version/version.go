@@ -71,7 +71,7 @@ func versionCmd(cmd *commands.Command, args []string) int {
 			{
 				b, err := json.MarshalIndent(runtimeInfo, "", "    ")
 				if err != nil {
-					logger.Log.Error(err.Error())
+					logger.Error(err.Error())
 				}
 				fmt.Println(string(b))
 				return 0
@@ -80,7 +80,7 @@ func versionCmd(cmd *commands.Command, args []string) int {
 			{
 				b, err := yaml.Marshal(&runtimeInfo)
 				if err != nil {
-					logger.Log.Error(err.Error())
+					logger.Error(err.Error())
 				}
 				fmt.Println(string(b))
 				return 0
@@ -106,7 +106,7 @@ func GetGoVersion() string {
 		err    error
 	)
 	if cmdOut, err = exec.Command("go", "version").Output(); err != nil {
-		logger.Log.Fatalf("There was an error running 'go version' command: %s", err)
+		logger.Fatalf("There was an error running 'go version' command: %s", err)
 	}
 	return strings.Split(string(cmdOut), " ")[2]
 }

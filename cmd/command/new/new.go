@@ -43,28 +43,28 @@ func init() {
 
 func CreateApp(cmd *commands.Command, args []string) int {
 	if err := cmd.Flag.Parse(args); err != nil {
-		logger.Log.Fatalf("Error while parsing flags: %v", err.Error())
+		logger.Fatalf("Error while parsing flags: %v", err.Error())
 	}
 
 	if len(appName) == 0 {
-		logger.Log.Fatal("Argument [appname] is missing")
+		logger.Fatal("Argument [appname] is missing")
 	}
 
 	if len(tempPath) == 0 {
-		logger.Log.Fatal("Argument [template path] is missing")
+		logger.Fatal("Argument [template path] is missing")
 	}
 	currpath, _ := os.Getwd()
 	appPath := path.Join(currpath, appName)
 
 	if utils.IsExist(appPath) {
-		logger.Log.Errorf(colors.Bold("Application '%s' already exists"), appPath)
-		logger.Log.Warn(colors.Bold("Do you want to overwrite it? [Yes|No] "))
+		logger.Errorf(colors.Bold("Application '%s' already exists"), appPath)
+		logger.Warn(colors.Bold("Do you want to overwrite it? [Yes|No] "))
 		if !utils.AskForConfirmation() {
 			os.Exit(2)
 		}
 	}
 
-	logger.Log.Info("Creating application...")
+	logger.Info("Creating application...")
 	return CreateFile(tempPath, appPath)
 }
 
@@ -93,16 +93,16 @@ func CreateFile(templatePath string, appPath string) int {
 				return nil
 			})
 			if err != nil {
-				logger.Log.Error(err.Error())
+				logger.Error(err.Error())
 				return 1
 			}
 			break
 		}
 	}
 	if !isTruePath {
-		logger.Log.Fatalf("the path not find %s template ,path:%v", template, templatePath)
+		logger.Fatalf("the path not find %s template ,path:%v", template, templatePath)
 	}
-	logger.Log.Success("New application successfully created!")
+	logger.Success("New application successfully created!")
 	return 0
 }
 
@@ -129,9 +129,9 @@ func createAllDir(filePath string) {
 	}
 	err := os.MkdirAll(filePath, 0755)
 	if err != nil {
-		logger.Log.Fatalf("fail create dir:%s ,err:%v", filePath, err)
+		logger.Fatalf("fail create dir:%s ,err:%v", filePath, err)
 	}
-	logger.Log.Success(fmt.Sprintf("create dir:%v", filePath+string(path.Separator)))
+	logger.Success(fmt.Sprintf("create dir:%v", filePath+string(path.Separator)))
 }
 
 //create file
@@ -139,13 +139,13 @@ func writeFile(filePath string, content string) {
 	f, err := os.Create(filePath)
 	defer f.Close()
 	if err != nil {
-		logger.Log.Fatalf("fail create file %v,err:%v", filePath, err)
+		logger.Fatalf("fail create file %v,err:%v", filePath, err)
 	}
 	_, err = f.WriteString(content)
 	if err != nil {
-		logger.Log.Fatalf("fail create file  %v,err:%v", filePath, err)
+		logger.Fatalf("fail create file  %v,err:%v", filePath, err)
 	}
 	//go fmt
 	utils.FormatSourceCode(filePath)
-	logger.Log.Success(fmt.Sprintf("create file:%v", filePath))
+	logger.Success(fmt.Sprintf("create file:%v", filePath))
 }

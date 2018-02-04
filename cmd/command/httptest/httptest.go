@@ -48,18 +48,18 @@ func init() {
 
 func RunHttptest(cmd *commands.Command, args []string) int {
 	if err := cmd.Flag.Parse(args); err != nil {
-		logger.Log.Fatalf("Error while parsing flags: %v", err.Error())
+		logger.Fatalf("Error while parsing flags: %v", err.Error())
 	}
 	filePath := hm.fxituresPath + "/" + hm.style
 	files, err := ioutil.ReadDir(filePath)
 	if err != nil {
-		logger.Log.Fatalf("please use httptest -pkg to set fixtures path to fix err :%v", err)
+		logger.Fatalf("please use httptest -pkg to set fixtures path to fix err :%v", err)
 	}
 	hm.jsonDataMap = make(map[string]interface{})
 	for _, v := range files {
 		ret, err := readFileToMap(filePath + "/" + v.Name())
 		if err != nil {
-			logger.Log.Errorf("%s %v+", v.Name(), err)
+			logger.Errorf("%s %v+", v.Name(), err)
 			continue
 		}
 		hm.jsonDataMap[v.Name()] = ret
@@ -77,40 +77,40 @@ func (hm *HttpJsonMock) RunServer() {
 	srv := http.Server{Addr: ports}
 	http.HandleFunc("/", hm.Handle)
 	go func() {
-		logger.Log.Infof("http test server start at %s", ports)
+		logger.Infof("http test server start at %s", ports)
 		if err := srv.ListenAndServe(); err != nil {
-			logger.Log.Infof("server listen: %s\n", err)
+			logger.Infof("server listen: %s\n", err)
 		}
 	}()
 	<-stopChan
-	logger.Log.Info("Shutting down server...")
+	logger.Info("Shutting down server...")
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	srv.Shutdown(ctx)
-	logger.Log.Info("Server gracefully stopped")
+	logger.Info("Server gracefully stopped")
 }
 
 func (hm *HttpJsonMock) Exec(paths []string, files []string, name string) {
 	temp, err := readFileToMap(name)
 	if err != nil {
-		logger.Log.Errorf("exec err %v", err)
+		logger.Errorf("exec err %v", err)
 	}
 	arr := strings.Split(name, "/")
 	str := arr[len(arr)-1]
 	hm.jsonDataMap[str] = temp
-	logger.Log.Infof("%s change and  save success", str)
+	logger.Infof("%s change and  save success", str)
 }
 
 //对请求进行处理
 func (hm *HttpJsonMock) Handle(w http.ResponseWriter, r *http.Request) {
 	var res map[string]interface{}
 	host, urlP := splitPath(r.URL.Path)
-	logger.Log.Infof("request path : %s", r.Method, host, urlP)
+	logger.Infof("request path : %s", r.Method, host, urlP)
 	fileName := host + ".json"
 	if temp, ok := hm.jsonDataMap[fileName]; ok {
 		res = temp.(map[string]interface{})
 	} else {
-		logger.Log.Errorf("no %s exist", host)
+		logger.Errorf("no %s exist", host)
 		return
 	}
 	//读取request 中的参数,判断请求的方式
@@ -126,7 +126,7 @@ func (hm *HttpJsonMock) Handle(w http.ResponseWriter, r *http.Request) {
 		//对post请求进行处理
 		date, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			logger.Log.Errorf("err: %v", err)
+			logger.Errorf("err: %v", err)
 		}
 		arr = string(date)
 		if strings.Contains(arr, "{") { //认为是json请求，就拼凑请求中的内容
@@ -143,7 +143,7 @@ func (hm *HttpJsonMock) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	keys := strings.Replace(strings.Join(key, "&"), " ", "", -1)
-	logger.Log.Infof("key: %v", fmt.Sprintf("%v", keys))
+	logger.Infof("key: %v", fmt.Sprintf("%v", keys))
 	//对fixtures中的参数进行匹配，并返回对应的response
 	if temp, ok := res[urlP]; ok { //判断时候是否是*
 		jsonToResponse(w, temp.(map[string]interface{}), keys)
@@ -153,7 +153,7 @@ func (hm *HttpJsonMock) Handle(w http.ResponseWriter, r *http.Request) {
 		if temp, ok = res[str]; ok {
 			jsonToResponse(w, temp.(map[string]interface{}), keys)
 		} else {
-			logger.Log.Errorf("no match url ,url should is : %s", urlP)
+			logger.Errorf("no match url ,url should is : %s", urlP)
 		}
 
 	}
@@ -178,24 +178,24 @@ func jsonToResponse(w http.ResponseWriter, arr map[string]interface{}, keys stri
 			if err != nil {
 				panic(err)
 			}
-			logger.Log.Infof("response is : %v", string(data))
+			logger.Infof("response is : %v", string(data))
 			w.Write(data)
 			return
 		}
 	}
-	logger.Log.Errorf("no match key,key should is : %v", keys)
+	logger.Errorf("no match key,key should is : %v", keys)
 }
 
 func readFileToMap(fileName string) (map[string]interface{}, error) {
 	bytes, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		logger.Log.Errorf("read file err: %v", err)
+		logger.Errorf("read file err: %v", err)
 		return nil, err
 	}
 
 	var ret map[string]interface{}
 	if err := json.Unmarshal(bytes, &ret); err != nil {
-		logger.Log.Errorf("read file json unmarshal err: %v", err)
+		logger.Errorf("read file json unmarshal err: %v", err)
 		return nil, err
 	}
 

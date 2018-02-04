@@ -46,7 +46,7 @@ func IsInGOPATH(thePath string) bool {
 func SearchGOPATHs(app string) (bool, string, string) {
 	gps := GetGOPATHs()
 	if len(gps) == 0 {
-		logger.Log.Fatal("GOPATH environment variable is not set or empty")
+		logger.Fatal("GOPATH environment variable is not set or empty")
 	}
 
 	// Lookup the application inside the user workspace(s)
@@ -76,7 +76,7 @@ func AskForConfirmation() bool {
 	var response string
 	_, err := fmt.Scanln(&response)
 	if err != nil {
-		logger.Log.Fatalf("%s", err)
+		logger.Fatalf("%s", err)
 	}
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
@@ -155,7 +155,7 @@ func CamelCase(in string) string {
 func FormatSourceCode(filename string) {
 	cmd := exec.Command("gofmt", "-w", filename)
 	if err := cmd.Run(); err != nil {
-		logger.Log.Warnf("Error while running gofmt: %s", err)
+		logger.Warnf("Error while running gofmt: %s", err)
 	}
 }
 
@@ -194,7 +194,7 @@ func TmplToString(tmpl string, data interface{}) string {
 	var doc bytes.Buffer
 	err := t.Execute(&doc, data)
 	if err != nil {
-		logger.Log.Fatalf("Error while TmplToString: %s", err)
+		logger.Fatalf("Error while TmplToString: %s", err)
 	}
 
 	return doc.String()
@@ -208,14 +208,14 @@ func Tmpl(text string, data interface{}) {
 
 	err := t.Execute(output, data)
 	if err != nil {
-		logger.Log.Error(err.Error())
+		logger.Error(err.Error())
 	}
 }
 
 func CheckEnv(appname string) (apppath, packpath string, err error) {
 	gps := GetGOPATHs()
 	if len(gps) == 0 {
-		logger.Log.Fatal("GOPATH environment variable is not set or empty")
+		logger.Fatal("GOPATH environment variable is not set or empty")
 	}
 	currpath, _ := os.Getwd()
 	currpath = filepath.Join(currpath, appname)
@@ -231,15 +231,14 @@ func CheckEnv(appname string) (apppath, packpath string, err error) {
 	// we use the first path
 	gopath := gps[0]
 
-	logger.Log.Warn("You current workdir is not inside $GOPATH/src.")
-	logger.Log.Debugf("GOPATH: %s", FILE(), LINE(), gopath)
+	logger.Warn("You current workdir is not inside $GOPATH/src.")
 
 	gosrcpath := filepath.Join(gopath, "src")
 	apppath = filepath.Join(gosrcpath, appname)
 
 	if _, e := os.Stat(apppath); !os.IsNotExist(e) {
 		err = fmt.Errorf("Cannot create application without removing '%s' first", apppath)
-		logger.Log.Errorf("Path '%s' already exists", apppath)
+		logger.Errorf("Path '%s' already exists", apppath)
 		return
 	}
 	packpath = strings.Join(strings.Split(apppath[len(gosrcpath)+1:], string(filepath.Separator)), "/")

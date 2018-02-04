@@ -29,7 +29,7 @@ type DoWatch interface {
 func NewWatcher(paths []string, files []string, do DoWatch) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Log.Fatalf("Failed to create watcher: %s", err)
+		logger.Fatalf("Failed to create watcher: %s", err)
 	}
 	go func() {
 		for {
@@ -43,17 +43,17 @@ func NewWatcher(paths []string, files []string, do DoWatch) {
 				}
 				do.Exec(paths, files, e.Name)
 			case err := <-watcher.Errors:
-				logger.Log.Warnf("Watcher error: %s", err.Error()) // No need to exit here
+				logger.Warnf("Watcher error: %s", err.Error()) // No need to exit here
 			}
 		}
 	}()
 
-	logger.Log.Info("Initializing watcher...")
+	logger.Info("Initializing watcher...")
 	for _, path := range paths {
-		logger.Log.Hintf(colors.Bold("Watching: ")+"%s", path)
+		logger.Infof(colors.Bold("Watching: ")+"%s", path)
 		err = watcher.Add(path)
 		if err != nil {
-			logger.Log.Fatalf("Failed to watch directory: %s", err)
+			logger.Fatalf("Failed to watch directory: %s", err)
 		}
 	}
 }
@@ -64,7 +64,7 @@ func shouldIgnoreFile(filename string) bool {
 	for _, regex := range ignoredFilesRegExps {
 		r, err := regexp.Compile(regex)
 		if err != nil {
-			logger.Log.Fatalf("Could not compile regular expression: %s", err)
+			logger.Fatalf("Could not compile regular expression: %s", err)
 		}
 		if r.MatchString(filename) {
 			return true

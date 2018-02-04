@@ -7,19 +7,20 @@ import (
 	"runtime"
 	"text/template"
 	"time"
-	"github.com/Guazi-inc/seed/logger"
+
+	log "github.com/Guazi-inc/seed/logger"
 )
 
 // RuntimeInfo holds information about the current runtime.
 type RuntimeInfo struct {
-	GoVersion    string
-	GOOS         string
-	GOARCH       string
-	NumCPU       int
-	GOPATH       string
-	GOROOT       string
-	Compiler     string
-	SeedVersion   string
+	GoVersion   string
+	GOOS        string
+	GOARCH      string
+	NumCPU      int
+	GOPATH      string
+	GOROOT      string
+	Compiler    string
+	SeedVersion string
 }
 
 // InitBanner loads the banner and prints it to output
@@ -27,12 +28,12 @@ type RuntimeInfo struct {
 // print the banner in case of error.
 func InitBanner(out io.Writer, in io.Reader) {
 	if in == nil {
-		logger.Log.Fatal("The input is nil")
+		log.Fatal("The input is nil")
 	}
 
 	banner, err := ioutil.ReadAll(in)
 	if err != nil {
-		logger.Log.Fatalf("Error while trying to read the banner: %s", err)
+		log.Fatalf("Error while trying to read the banner: %s", err)
 	}
 
 	show(out, string(banner))
@@ -44,7 +45,7 @@ func show(out io.Writer, content string) {
 		Parse(content)
 
 	if err != nil {
-		logger.Log.Fatalf("Cannot parse the banner template: %s", err)
+		log.Fatalf("Cannot parse the banner template: %s", err)
 	}
 
 	err = t.Execute(out, RuntimeInfo{
@@ -58,7 +59,7 @@ func show(out io.Writer, content string) {
 		version,
 	})
 	if err != nil {
-		logger.Log.Error(err.Error())
+		log.Error(err.Error())
 	}
 }
 
