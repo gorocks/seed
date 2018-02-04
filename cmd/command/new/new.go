@@ -87,8 +87,8 @@ func CreateFile(templatePath string, appPath string) int {
 					if err != nil {
 						return err
 					}
-					realPath := strings.Split(strings.Split(tempPath, template)[1], ".tmpl")[0]
-					careateFile(appPath, realPath, string(data))
+					fileName := strings.Split(strings.Split(tempPath, template)[1], ".tmpl")[0]
+					careateFile(appPath, fileName, string(data))
 				}
 				return nil
 			})
@@ -106,20 +106,22 @@ func CreateFile(templatePath string, appPath string) int {
 	return 0
 }
 
-func careateFile(templatePath, realPath string, content string) {
-	arr := strings.Split(realPath, "/")
-	dir := templatePath
+func careateFile(appPath, fileName string, content string) {
+	arr := strings.Split(fileName, "/")
 	for _, v := range arr[:len(arr)-1] {
 		if v == "" {
 			continue
 		}
-		dir = path.Join(dir, v)
+		appPath = path.Join(appPath, v)
 	}
 	//创建文件需要目录
-	createAllDir(dir)
+	createAllDir(appPath)
+
+	//获取文件名和后缀名
+
 	//创建文件
 	content = strings.Replace(strings.Replace(content, "{{.Appname}}", appName, -1), "{{.GroupName}}", groupName, -1)
-	writeFile(path.Join(dir, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
+	writeFile(path.Join(appPath, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
 }
 
 //create dir from path
@@ -145,7 +147,10 @@ func writeFile(filePath string, content string) {
 	if err != nil {
 		logger.Fatalf("fail create file  %v,err:%v", filePath, err)
 	}
-	//go fmt
-	utils.FormatSourceCode(filePath)
+	//判断文件后缀 进行格式化 todo 多种格式化
+	if strings.HasSuffix(filePath, ".go") {
+		//go fmt
+		utils.FormatSourceCode(filePath)
+	}
 	logger.Success(fmt.Sprintf("create file:%v", filePath))
 }
