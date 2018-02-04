@@ -47,20 +47,31 @@ To create a new seedgo web application:
 ```bash
 $ seed new my-web-app -tp="template/path"
 seedVersion:0.0.1
-2018/02/03 14:32:52 INFO     ▶ 0001 Creating application...
-2018/02/03 14:32:52 SUCCESS  ▶ 0002 create dir:/go/src/github.com/Guazi-inc/seed/explame/
-2018/02/03 14:32:52 SUCCESS  ▶ 0004 create file:/go/src/github.com/Guazi-inc/seed/explame/.gitgnore
-2018/02/03 14:32:52 SUCCESS  ▶ 0008 create file:/go/src/github.com/Guazi-inc/seed/explame/README.md
-2018/02/03 14:32:52 SUCCESS  ▶ 0009 create dir:/go/src/github.com/Guazi-inc/seed/explame/cmd/consumer/
-2018/02/03 14:32:52 SUCCESS  ▶ 0011 create dir:/go/src/github.com/Guazi-inc/seed/explame/cmd/grpcserver/
-2018/02/03 14:32:52 SUCCESS  ▶ 0013 create dir:/go/src/github.com/Guazi-inc/seed/explame/cmd/grpcweb/
-2018/02/03 14:32:52 SUCCESS  ▶ 0015 create dir:/go/src/github.com/Guazi-inc/seed/explame/databases/
-2018/02/03 14:32:52 SUCCESS  ▶ 0024 create file:/go/src/github.com/Guazi-inc/seed/explame/gip.yml
-2018/02/03 14:32:52 SUCCESS  ▶ 0026 create file:/go/src/github.com/Guazi-inc/seed/explame/gometalinter.json
-2018/02/03 14:32:52 SUCCESS  ▶ 0032 create dir:/go/src/github.com/Guazi-inc/seed/explame/model/
-2018/02/03 14:32:52 SUCCESS  ▶ 0036 create file:/go/src/github.com/Guazi-inc/seed/explame/requirements.txt
-2018/02/03 14:32:52 SUCCESS  ▶ 0037 create dir:/go/src/github.com/Guazi-inc/seed/explame/service/
-2018/02/03 14:32:52 SUCCESS  ▶ 0039 New application successfully created!
+2018/02/04 09:07:49 [INFO]    : Creating application...
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/.gitgnore
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/.gitlab-ci.yml
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/README.md
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/cmd/consumer/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/cmd/consumer/main.go
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/cmd/grpcserver/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/cmd/grpcserver/main.go
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/cmd/grpcweb/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/cmd/grpcweb/main.go
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/databases/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/databases/init-tables.py
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/databases/init.sql
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/fixtures/apply/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/fixtures/apply/user.yml
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/gometalinter.json
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/model/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/model/user.go
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/model/user_test.go
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/requirements.txt
+2018/02/04 09:07:49 [SUCCESS] : create dir:/$GOPATH/src/github.com/Guazi-inc/seed/explame/service/
+2018/02/04 09:07:49 [SUCCESS] : create file:/$GOPATH/src/github.com/Guazi-inc/seed/explame/service/preaudit-service.go
+2018/02/04 09:07:49 [SUCCESS] : New application successfully created!
+
 
 ```
 
