@@ -29,7 +29,7 @@ Run http server fot test,this server will supervise the filesystem of the applic
 }
 
 type HttpJsonMock struct {
-	jsonDataMap  map[string]interface{}
+	jsonResponse map[string]interface{}
 	port         string
 	fxituresPath string
 	style        string
@@ -55,14 +55,14 @@ func RunHttptest(cmd *commands.Command, args []string) int {
 	if err != nil {
 		logger.Fatalf("please use httptest -pkg to set fixtures path to fix err :%v", err)
 	}
-	hm.jsonDataMap = make(map[string]interface{})
+	hm.jsonResponse = make(map[string]interface{})
 	for _, v := range files {
 		ret, err := readFileToMap(filePath + "/" + v.Name())
 		if err != nil {
 			logger.Errorf("%s %v+", v.Name(), err)
 			continue
 		}
-		hm.jsonDataMap[v.Name()] = ret
+		hm.jsonResponse[v.Name()] = ret
 	}
 	utils.NewWatcher([]string{filePath}, []string{}, &hm)
 	hm.RunServer()
@@ -97,7 +97,7 @@ func (hm *HttpJsonMock) Exec(paths []string, files []string, name string) {
 	}
 	arr := strings.Split(name, "/")
 	str := arr[len(arr)-1]
-	hm.jsonDataMap[str] = temp
+	hm.jsonResponse[str] = temp
 	logger.Infof("%s change and  save success", str)
 }
 
@@ -107,7 +107,7 @@ func (hm *HttpJsonMock) Handle(w http.ResponseWriter, r *http.Request) {
 	host, urlP := splitPath(r.URL.Path)
 	logger.Infof("request path : %s", r.Method, host, urlP)
 	fileName := host + ".json"
-	if temp, ok := hm.jsonDataMap[fileName]; ok {
+	if temp, ok := hm.jsonResponse[fileName]; ok {
 		res = temp.(map[string]interface{})
 	} else {
 		logger.Errorf("no %s exist", host)

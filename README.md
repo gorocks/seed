@@ -5,7 +5,7 @@ seed is a command-line tool to quick start  application.
 
 ## Installation
 
-To install `seed` use the `go get` command:
+To install `seed` use the `go get` command and need to use gip install:
 
 ```bash
 go get github.com/Guazi-inc/seed
@@ -24,7 +24,7 @@ seed provides a variety of commands which can be helpful at various stages of de
 
 ### seed version
 
-To display the current version of `seed`, `seedgo` and `go` installed on your machine:
+To display the current version of `seed` and `go` installed on your machine:
 
 ```bash
 $ seed version

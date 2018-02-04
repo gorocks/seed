@@ -41,7 +41,7 @@ var CmdVersion = &commands.Command{
 }
 var outputFormat string
 
-const version = "0.0.1"
+const version = "v0.0.1"
 
 func init() {
 	fs := flag.NewFlagSet("version", flag.ContinueOnError)

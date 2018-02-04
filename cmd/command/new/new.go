@@ -117,8 +117,6 @@ func careateFile(appPath, fileName string, content string) {
 	//创建文件需要目录
 	createAllDir(appPath)
 
-	//获取文件名和后缀名
-
 	//创建文件
 	content = strings.Replace(strings.Replace(content, "{{.Appname}}", appName, -1), "{{.GroupName}}", groupName, -1)
 	writeFile(path.Join(appPath, strings.Replace(arr[len(arr)-1], "\n", "", -1)), content)
