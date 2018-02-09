@@ -72,7 +72,7 @@ func SearchGOPATHs(app string) (bool, string, string) {
 // confirmations. If the input is not recognized, it will ask again. The function does not return
 // until it gets a valid response from the user. Typically, you should use fmt to print out a question
 // before calling askForConfirmation. E.g. fmt.Println("WARNING: Are you sure? (yes/no)")
-func AskForConfirmation() bool {
+func AskForConfirmation() string {
 	var response string
 	_, err := fmt.Scanln(&response)
 	if err != nil {
@@ -80,12 +80,18 @@ func AskForConfirmation() bool {
 	}
 	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	skipResponses := []string{"s", "skip", "sk"}
+	allResponses := []string{"all", "skip all", "sa", "a"}
 	if containsString(okayResponses, response) {
-		return true
+		return "yes"
 	} else if containsString(nokayResponses, response) {
-		return false
+		return "no"
+	} else if containsString(skipResponses, response) {
+		return "skip"
+	} else if containsString(allResponses, response) {
+		return "all"
 	} else {
-		fmt.Println("Please type yes or no and then press enter:")
+		fmt.Println("Please right type  then press enter:")
 		return AskForConfirmation()
 	}
 }
