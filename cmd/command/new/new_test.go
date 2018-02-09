@@ -35,7 +35,7 @@ func (s *{{$.ServiceName}}) {{.FunName}}(ctx context.Context, in *{{ tmp .Reques
 {{end}}
 
 `
-	protoP := "/Users/luan/go/src/protobuf-schema/proto/finance/service/repay/repay_offline_apply.proto"
+	protoP := "/Users/luan/go/src/protobuf-schema/proto/finance/service/borrow/borrow.proto"
 	g := proto.GeneratorProto{}
 	err := g.Generator(protoP)
 	if err != nil {

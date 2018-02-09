@@ -63,15 +63,15 @@ func (g *GeneratorProto) Generator(filePath string) error {
 						Request:  rpc.RequestType,
 						Response: rpc.ReturnsType,
 					}
-					arr1 := strings.Split(rpc.ReturnsType, ".")
-					if len(arr1) >= 2 {
+					arr1 := strings.Split(gfun.Response, ".")
+					if len(arr1) > 1 {
 						if _, ok := ims[arr1[0]]; !ok {
 							ims[arr1[0]] = importMap[arr1[0]]
 						}
 					}
-					arr2 := strings.Split(rpc.RequestType, ".")
-					if len(arr2) >= 2 {
-						if _, ok := ims[arr2[0]]; ok {
+					arr2 := strings.Split(gfun.Request, ".")
+					if len(arr2) > 1 {
+						if _, ok := ims[arr2[0]]; !ok {
 							ims[arr2[0]] = importMap[arr2[0]]
 						}
 					}
@@ -89,6 +89,9 @@ func (g *GeneratorProto) Generator(filePath string) error {
 			path := value.Filename
 			//处理path
 			arr := strings.Split(path, "/")
+			if len(arr) < 2 {
+				panic(errors.New("invalid proto path this path only one"))
+			}
 			importMap[arr[len(arr)-2]] = strings.Join(arr[:len(arr)-1], "/")
 		}
 	}

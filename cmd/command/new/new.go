@@ -85,7 +85,7 @@ type serviceTemp struct {
 	Imports     []string
 }
 
-var isOroverwriteAll = false
+var isOverwriteAll = false
 
 func init() {
 	fs := flag.NewFlagSet("new", flag.ContinueOnError)
@@ -120,7 +120,8 @@ func CreateApp(cmd *commands.Command, args []string) int {
 		logger.Warn(colors.Bold("Do you want to overwrite all ? [Yes|No] "))
 		str := utils.AskForConfirmation()
 		if str == "yes" || str == "all" {
-			isOroverwriteAll = true
+			isOverwriteAll = true
+			logger.Info("Overwrite all file...")
 		}
 	}
 
@@ -209,37 +210,40 @@ func createAllDir(filePath string) {
 	if err != nil {
 		logger.Fatalf("fail create dir:%s ,err:%v", filePath, err)
 	}
-	logger.Success(fmt.Sprintf("create dir:%v", filePath+string(path.Separator)))
+	logger.Success(fmt.Sprintf("Create dir:%v", filePath+string(path.Separator)))
 }
 
 //create file
 func writeFile(filePath string, content string) {
-	if utils.IsExist(filePath) && !isOroverwriteAll {
+	if utils.IsExist(filePath) && !isOverwriteAll {
 		logger.Errorf(colors.Bold("Application '%s' already exists"), filePath)
 		logger.Warn(colors.Bold("Do you want to overwrite it ? [Yes|No|skip|all] "))
 		switch utils.AskForConfirmation() {
 		case "no", "skip":
+			logger.Infof("Skip %v this file", filePath)
 			return
 		case "yes":
+			logger.Infof("Overwrite %v this file", filePath)
 		case "all":
-			isOroverwriteAll = true
+			isOverwriteAll = true
+			logger.Info("Overwrite all begin this file")
 		}
 	}
 	f, err := os.Create(filePath)
 	defer f.Close()
 	if err != nil {
-		logger.Fatalf("fail create file %v,err:%v", filePath, err)
+		logger.Fatalf("Fail create file %v,err:%v", filePath, err)
 	}
 	_, err = f.WriteString(content)
 	if err != nil {
-		logger.Fatalf("fail create file  %v,err:%v", filePath, err)
+		logger.Fatalf("Fail create file  %v,err:%v", filePath, err)
 	}
 	//判断文件后缀 进行格式化 todo 多种格式化
 	if strings.HasSuffix(filePath, ".go") {
 		//go fmt
 		utils.FormatSourceCode(filePath)
 	}
-	logger.Success(fmt.Sprintf("create file:%v", filePath))
+	logger.Success(fmt.Sprintf("Create file:%v", filePath))
 }
 
 //创建service
