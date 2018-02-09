@@ -59,22 +59,6 @@ func (s *{{$.ServiceName}}) {{.FunName}}(ctx context.Context, in *{{ tmp .Reques
 {{end}}
 
 `
-var service = `package service
-
-import (
-	"google.golang.org/grpc"
-)
-
-// RegisterGRPCWebServices RegisterAll grpc web services
-func RegisterGRPCWebServices(grpcServer *grpc.Server) {
-	
-}
-
-// RegisterGRPCServices RegisterAll grpc services
-func RegisterGRPCServices(grpcServer *grpc.Server) {
-}
-
-`
 
 type serviceTemp struct {
 	PackageName string
@@ -85,7 +69,10 @@ type serviceTemp struct {
 	Imports     []string
 }
 
-var isOverwriteAll = false
+var (
+	isOverwriteAll = false
+	isSkipAll      = false
+)
 
 func init() {
 	fs := flag.NewFlagSet("new", flag.ContinueOnError)
@@ -215,20 +202,29 @@ func createAllDir(filePath string) {
 
 //create file
 func writeFile(filePath string, content string) {
+	if isSkipAll {
+		logger.Warnf("Skip %v", filePath)
+		return
+	}
 	if utils.IsExist(filePath) && !isOverwriteAll {
-		logger.Errorf(colors.Bold("Application '%s' already exists"), filePath)
-		logger.Warn(colors.Bold("Do you want to overwrite it ? [Yes|No|skip|all] "))
+		logger.Errorf(colors.Bold("file '%s' already exists"), filePath)
+		logger.Warn(colors.Bold("Do you want to overwrite it , skip it , skip all or overwrite all,yes is just overwrite current file? [yes|overwrite|skip|skip all|overwrite all] "))
 		switch utils.AskForConfirmation() {
-		case "no", "skip":
+		case "skip":
 			logger.Infof("Skip %v this file", filePath)
 			return
 		case "yes":
 			logger.Infof("Overwrite %v this file", filePath)
-		case "all":
+		case "skip all":
+			isSkipAll = true
+			logger.Infof("skip all begin this file %v", filePath)
+			return
+		case "overWrite all":
 			isOverwriteAll = true
-			logger.Info("Overwrite all begin this file")
+			logger.Infof("overwrite all begin current file :%v", filePath)
 		}
 	}
+
 	f, err := os.Create(filePath)
 	defer f.Close()
 	if err != nil {
@@ -256,6 +252,46 @@ func generatorServiceFromProto(fileName string) (*proto.GeneratorProto, error) {
 	return &g, err
 }
 
+type service struct {
+	AppGoPath      string `json:"app_go_path"`
+	ProtoPath      []string
+	RegisterServer map[string][]string
+	IsWed          bool
+	IsGrpc         bool
+}
+
+var serviceTmp = `package service
+
+import (
+	{{range $k,$v:=.ProtoPath}}
+"{{$v}}"
+	{{end}}
+	"google.golang.org/grpc"
+	{{range $k,$v:=.RegisterServer}}
+{{$k}}2 "{{$.AppGoPath}}/service/{{$k}}"
+	{{end}}
+)
+
+// RegisterGRPCWebServices RegisterAll grpc web services
+func RegisterGRPCWebServices(grpcServer *grpc.Server) {
+	{{range $k,$v:=.RegisterServer}}
+{{range $i,$j:=$v}}
+{{$k}}.Register{{$j}}Server(grpcServer,&{{$k}}2.{{$j}}{})
+{{end}}
+{{end}}
+}
+
+// RegisterGRPCServices RegisterAll grpc services
+func RegisterGRPCServices(grpcServer *grpc.Server) {
+{{range $k,$v:=.RegisterServer}}
+{{range $i,$j:=$v}}
+{{$k}}.Register{{$j}}Server(grpcServer,&{{$k}}2.{{$j}}{})
+{{end}}
+{{end}}
+}
+
+`
+
 func genService(appPath string, protoPaths string) {
 	t := tmp.New("Service") //创建一个模板
 	t.Funcs(tmp.FuncMap{
@@ -265,6 +301,11 @@ func genService(appPath string, protoPaths string) {
 	if err != nil {
 		panic(err)
 	}
+	ser := service{
+		AppGoPath: path.Join(utils.GetUsefulPath(appPath, "src", false), appName),
+	}
+	registerMap := make(map[string][]string)
+	pPath := make([]string, 0)
 	err = path.Walk(protoPaths, func(paths string, info os.FileInfo, err error) error {
 		if info == nil {
 			return nil
@@ -275,15 +316,13 @@ func genService(appPath string, protoPaths string) {
 				return err
 			}
 			servicePath := path.Join(appPath, "service", g.Package)
-			arr := strings.Split(paths, "/")
-			servicePackPath := ""
-			for k, v := range arr {
-				if v == "proto" {
-					servicePackPath = strings.Join(arr[k:len(arr)-1], "/")
-				}
-			}
+
+			servicePackPath := utils.GetUsefulPath(paths, "proto", true)
+			pPath = append(pPath, servicePackPath)
 			//建某一个proto的文件夹
 			createAllDir(servicePath)
+
+			sNames := make([]string, 0)
 			for _, v := range g.Service {
 				stemp := serviceTemp{
 					ServiceName: v.ServiceName,
@@ -293,6 +332,9 @@ func genService(appPath string, protoPaths string) {
 					PackageName: strings.ToLower(v.ServiceName),
 					Rpc:         v.Rpc,
 				}
+				if v.ServiceName != "" {
+					sNames = append(sNames, v.ServiceName)
+				}
 				var content bytes.Buffer
 				err = p.Execute(&content, stemp)
 				if err != nil {
@@ -301,12 +343,30 @@ func genService(appPath string, protoPaths string) {
 				//建立某一个service的文件
 				writeFile(path.Join(servicePath, strings.ToLower(v.ServiceName))+".go", content.String())
 			}
+			if len(sNames) > 0 && len(g.Service) > 0 {
+				logger.Infof("sNames %v", sNames)
+				registerMap[g.Package] = sNames
+			}
 		}
 		return nil
 	})
 	if err != nil {
 		panic(err)
 	}
+	ser.RegisterServer = registerMap
+	ser.ProtoPath = utils.RmDuplicate(pPath)
+	st := tmp.New("Service-go") //创建一个模板
+	sp, err := st.Parse(serviceTmp)
+	if err != nil {
+		panic(err)
+	}
+	var content bytes.Buffer
+	err = sp.Execute(&content, &ser)
+	if err != nil {
+		panic(err)
+	}
+	writeFile(path.Join(appPath, "service", "service")+".go", content.String())
+
 }
 
 func ServiceTemplPath(str string, str2 string) string {

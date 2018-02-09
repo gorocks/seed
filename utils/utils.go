@@ -78,10 +78,12 @@ func AskForConfirmation() string {
 	if err != nil {
 		logger.Fatalf("%s", err)
 	}
-	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES", "overwrite"}
 	nokayResponses := []string{"n", "N", "no", "No", "NO"}
 	skipResponses := []string{"s", "skip", "sk"}
 	allResponses := []string{"all", "skip all", "sa", "a"}
+	ovResponses := []string{"owa", "overwrite all"}
+
 	if containsString(okayResponses, response) {
 		return "yes"
 	} else if containsString(nokayResponses, response) {
@@ -89,7 +91,9 @@ func AskForConfirmation() string {
 	} else if containsString(skipResponses, response) {
 		return "skip"
 	} else if containsString(allResponses, response) {
-		return "all"
+		return "skip all"
+	} else if containsString(ovResponses, response) {
+		return "overwrite all"
 	} else {
 		fmt.Println("Please right type  then press enter:")
 		return AskForConfirmation()
@@ -361,4 +365,36 @@ func defaultGOPATH() string {
 		return filepath.Join(home, "go")
 	}
 	return ""
+}
+
+func GetUsefulPath(path string, field string, isContaint bool) string {
+	arr := strings.Split(path, "/")
+	for k, v := range arr {
+		if v == field {
+			if !isContaint {
+				return strings.Join(arr[k+1:len(arr)-1], "/")
+			}
+			return strings.Join(arr[k:len(arr)-1], "/")
+		}
+	}
+	return ""
+}
+
+func RmDuplicate(list []string) []string {
+	var x []string = []string{}
+	for _, i := range list {
+		if len(x) == 0 {
+			x = append(x, i)
+		} else {
+			for k, v := range x {
+				if i == v {
+					break
+				}
+				if k == len(x)-1 {
+					x = append(x, i)
+				}
+			}
+		}
+	}
+	return x
 }
