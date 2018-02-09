@@ -1,3 +1,5 @@
-https://github.com/fsnotify/fsnotify#4da3e2cfbabc9f751898f250b49f2439785783a1,github.com/fsnotify/fsnotify
+https://github.com/emicklei/proto#b22518efa7b8abc36845e661109fb9d9ede9bc2b,github.com/emicklei/proto
+https://github.com/fsnotify/fsnotify#c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9,github.com/fsnotify/fsnotify
+https://github.com/gin-gonic/gin#9e895470ddd40a45f28dbe4e96bfb5e893d54f9e,github.com/gin-gonic/gin
 https://github.com/golang/sys#a646d33e2ee3172a661fc09bca23bb4889a41bc8,golang.org/x/sys
-https://gopkg.in/yaml.v2#25c4ec802a7d637f88d584ab26798e94ad14c13b,gopkg.in/yaml.v2
+https://gopkg.in/yaml.v2#287cf08546ab5e7e37d55a84f7ed3fd1db036de5,gopkg.in/yaml.v2
