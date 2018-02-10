@@ -90,10 +90,19 @@ USAGE
 
 OPTIONS
   -g=finance
-      this application belong which group
+      this application belong  with which group
+  
+  -gip=false
+      do gip install -v requirements.txt
   
   -n
       set a name for application
+  
+  -pt
+      proto file path
+  
+  -s=grpcweb
+      can choose grpcweb,grpcservice,consumer,all
   
   -tn=eipis-apply
       template name,use which template
