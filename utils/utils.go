@@ -22,6 +22,31 @@ func IsExist(path string) bool {
 	return err == nil || os.IsExist(err)
 }
 
+//CheckGip returns whether gip exists.
+func CheckGip() bool {
+	cmd := exec.Command("gip", "version")
+	bout := bytes.NewBuffer(nil)
+	cmd.Stdout = bout
+	if err := cmd.Run(); err != nil {
+		logger.Warnf("use gip can read https://github.com/caojia/gip")
+		logger.Warnf("Error while running gip: %s", err)
+		return false
+	}
+	logger.Infof("gip local version is:%v", bout.String())
+	return true
+}
+
+//DoGipInstall gip install from requirements.txt
+func DoGipInstall(requirementsPath string) {
+	cmd := exec.Command("gip", "install", "-v", requirementsPath)
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		logger.Warnf("use gip can read https://github.com/caojia/gip")
+		logger.Warnf("Error while running gip: %s", err)
+	}
+	logger.Info("do gip install success")
+}
+
 // GetGOPATHs returns all paths in GOPATH variable.
 func GetGOPATHs() []string {
 	goPath := os.Getenv("GOPATH")

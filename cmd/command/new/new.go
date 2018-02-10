@@ -34,6 +34,7 @@ var (
 	style     string
 	template  string
 	tempPath  string
+	isGip     bool
 )
 
 var serviceTmpl = `package {{.Package}}
@@ -81,6 +82,7 @@ func init() {
 	fs.StringVar(&style, "s", "grpcweb", "can choose grpcweb,grpcservice,consumer,all")
 	fs.StringVar(&template, "tn", "eipis-apply", "template name,use which template")
 	fs.StringVar(&tempPath, "tp", "", "template path")
+	fs.BoolVar(&isGip, "gip", false, "do gip install -v requirements.txt")
 	CmdNew.Flag = *fs
 
 	commands.AvailableCommands = append(commands.AvailableCommands, CmdNew)
@@ -210,6 +212,9 @@ func careateFile(fileRPath, fileName string, content string) {
 	//创建文件
 	content = strings.Replace(strings.Replace(content, "{{.Appname}}", appName, -1), "{{.GroupName}}", groupName, -1)
 	writeFile(path.Join(fileRPath, fileName), content)
+	if fileName == "requirements.txt" && isGip {
+		doGip(path.Join(fileRPath, fileName))
+	}
 }
 
 //create dir from path
@@ -397,6 +402,12 @@ func genService(appPath string, protoPaths string, isWed, isGrpc bool) {
 	}
 	writeFile(path.Join(appPath, "service", "service")+".go", content.String())
 
+}
+
+func doGip(reqPath string) {
+	if utils.CheckGip() {
+		utils.DoGipInstall(reqPath)
+	}
 }
 
 func ServiceTemplPath(str string, str2 string) string {
