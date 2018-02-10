@@ -8,10 +8,6 @@ import (
 	"github.com/emicklei/proto"
 )
 
-const (
-	GOOGLEEMPTY = "github.com/golang/protobuf/ptypes/empty"
-)
-
 type GeneratorProto struct {
 	Package string      `json:"package"`
 	Service []*GService `json:"service"`

@@ -1,6 +1,7 @@
 package new
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -8,8 +9,6 @@ import (
 	path "path/filepath"
 	"strings"
 	tmp "text/template"
-
-	"bytes"
 
 	"github.com/Guazi-inc/seed/cmd/command"
 	"github.com/Guazi-inc/seed/cmd/command/generator/proto"
@@ -77,9 +76,9 @@ var (
 func init() {
 	fs := flag.NewFlagSet("new", flag.ContinueOnError)
 	fs.StringVar(&appName, "n", "", "set a name for application")
-	fs.StringVar(&groupName, "g", "finance", "this application belong which group")
-	fs.StringVar(&protoPath, "pt", "", "proto path")
-	fs.StringVar(&style, "s", "grpcweb", "can choose grpcweb,grpcservice,consumer")
+	fs.StringVar(&groupName, "g", "finance", "this application belong  with which group")
+	fs.StringVar(&protoPath, "pt", "", "proto file path")
+	fs.StringVar(&style, "s", "grpcweb", "can choose grpcweb,grpcservice,consumer,all")
 	fs.StringVar(&template, "tn", "eipis-apply", "template name,use which template")
 	fs.StringVar(&tempPath, "tp", "", "template path")
 	CmdNew.Flag = *fs
@@ -120,10 +119,26 @@ func CreateApp(cmd *commands.Command, args []string) int {
 func CreateFile(templatePath string, appPath string) int {
 
 	files, _ := ioutil.ReadDir(templatePath)
-	isTruePath := false
-	isNeedGeneratorProto := false
+	var (
+		isTruePath           = false
+		isNeedGeneratorProto = false
+		isWeb                = false
+		isGrpc               = false
+		isconsumer           = false
+	)
 	if len(protoPath) > 0 { //protopath不为空，先生成对应的proto service文件
 		isNeedGeneratorProto = true
+	}
+	switch style {
+	case "grpcweb", "web", "gw":
+		isWeb = true
+	case "grpcservice", "gs":
+		isGrpc = true
+	case "consumer", "c":
+		isconsumer = true
+	case "all", "a":
+		isWeb = true
+		isGrpc = true
 	}
 	for _, fi := range files {
 		if fi.IsDir() && fi.Name() == template { //找到当前目录下名字为template的文件夹
@@ -131,7 +146,7 @@ func CreateFile(templatePath string, appPath string) int {
 			//创建总项目目录
 			createAllDir(appPath)
 			if isNeedGeneratorProto { //是否是通过proto生成service
-				genService(appPath, protoPath)
+				genService(appPath, protoPath, isWeb, isGrpc)
 			}
 			//遍历文件夹建立模板文件
 			err := path.Walk(path.Join(templatePath, template), func(tempPath string, info os.FileInfo, err error) error {
@@ -153,6 +168,15 @@ func CreateFile(templatePath string, appPath string) int {
 					for k, v := range at {
 						//处理path，
 						if isNeedGeneratorProto && v == "service" {
+							return nil
+						}
+						if !isWeb && v == "grpcweb" {
+							return nil
+						}
+						if !isGrpc && v == "grpcserver" {
+							return nil
+						}
+						if !isconsumer && v == "consumer" {
 							return nil
 						}
 						if k == (len(at) - 1) {
@@ -272,6 +296,8 @@ import (
 	{{end}}
 )
 
+{{if .IsWed}}
+
 // RegisterGRPCWebServices RegisterAll grpc web services
 func RegisterGRPCWebServices(grpcServer *grpc.Server) {
 	{{range $k,$v:=.RegisterServer}}
@@ -280,7 +306,9 @@ func RegisterGRPCWebServices(grpcServer *grpc.Server) {
 {{end}}
 {{end}}
 }
+{{end}}
 
+{{if .IsGrpc}}
 // RegisterGRPCServices RegisterAll grpc services
 func RegisterGRPCServices(grpcServer *grpc.Server) {
 {{range $k,$v:=.RegisterServer}}
@@ -289,10 +317,11 @@ func RegisterGRPCServices(grpcServer *grpc.Server) {
 {{end}}
 {{end}}
 }
+{{end}}
 
 `
 
-func genService(appPath string, protoPaths string) {
+func genService(appPath string, protoPaths string, isWed, isGrpc bool) {
 	t := tmp.New("Service") //创建一个模板
 	t.Funcs(tmp.FuncMap{
 		"tmp": ServiceTemplPath,
@@ -303,6 +332,8 @@ func genService(appPath string, protoPaths string) {
 	}
 	ser := service{
 		AppGoPath: path.Join(utils.GetUsefulPath(appPath, "src", false), appName),
+		IsWed:     isWed,
+		IsGrpc:    isGrpc,
 	}
 	registerMap := make(map[string][]string)
 	pPath := make([]string, 0)
@@ -344,7 +375,6 @@ func genService(appPath string, protoPaths string) {
 				writeFile(path.Join(servicePath, strings.ToLower(v.ServiceName))+".go", content.String())
 			}
 			if len(sNames) > 0 && len(g.Service) > 0 {
-				logger.Infof("sNames %v", sNames)
 				registerMap[g.Package] = sNames
 			}
 		}
