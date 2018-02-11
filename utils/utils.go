@@ -47,6 +47,44 @@ func DoGipInstall(requirementsPath string) {
 	logger.Info("do gip install success")
 }
 
+func InstallAndUpdateGometalinter() bool {
+	cmd1 := exec.Command("go", "get", "-u", "github.com/alecthomas/gometalinter")
+	if err := cmd1.Run(); err != nil {
+		logger.Warnf("use gometalinter  can read https://github.com/alecthomas/gometalinter")
+		logger.Warnf("Error while running go get -u : %s", err)
+		return false
+	}
+	cmd2 := exec.Command("gometalinter", " --install")
+	if err := cmd2.Run(); err != nil {
+		return false
+	}
+	return true
+}
+
+//do gometalinter from json
+func DoGometalinterFromJson(filePath string) {
+	cmd := exec.Command("gometalinter", "./...", fmt.Sprintf("--config=%s", filePath))
+	cmd.Stdout = os.Stdout
+	logger.Info("begin gometalinter")
+	if err := cmd.Run(); err != nil {
+		logger.Info("use gometalinter  can read https://github.com/alecthomas/gometalinter")
+		logger.Fatalf("Error while running gometalinter: %s", err)
+	}
+	logger.Success("gometalinter success")
+}
+
+//do gometalinter from ci
+func DoGometalinterCI() {
+	cmd := exec.Command("gometalinter", "./...", "--cyclo-over=15", "--enable=deadcode", "--enable=errcheck", "--enable=gas", "--enable=goconst", "--enable=gocyclo", "--enable=golint", "--enable=gotype", "--enable=ineffassign", "--enable=interfacer", "--enable=megacheck", "--enable=structcheck", "--enable=unconvert", "--enable=varcheck", "--enable=vet", "--enable=vetshadow", "--enable=gofmt", "--enable=goimports", "--enable=unparam", "--enable=misspell", "--deadline=180s", "--concurrency=4")
+	cmd.Stdout = os.Stdout
+	logger.Info("begin gometalinter")
+	if err := cmd.Run(); err != nil {
+		logger.Info("use gometalinter  can read https://github.com/alecthomas/gometalinter")
+		logger.Fatalf("Error while running gometalinter: %s", err)
+	}
+	logger.Success("gometalinter success")
+}
+
 // GetGOPATHs returns all paths in GOPATH variable.
 func GetGOPATHs() []string {
 	goPath := os.Getenv("GOPATH")

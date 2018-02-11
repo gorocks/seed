@@ -4,6 +4,7 @@ import (
 	"github.com/Guazi-inc/seed/cmd/command"
 	_ "github.com/Guazi-inc/seed/cmd/command/httptest"
 	_ "github.com/Guazi-inc/seed/cmd/command/new"
+	_ "github.com/Guazi-inc/seed/cmd/command/validate"
 	_ "github.com/Guazi-inc/seed/cmd/command/version"
 	"github.com/Guazi-inc/seed/utils"
 )
