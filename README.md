@@ -79,9 +79,34 @@ For more information on the usage, run `seed help new`.
 
 ## Help
 
-To print more information on the usage of a particular command, use `seed help <command>`.
+To print more information on the usage of a particular command, use `seed help`.
 
-For instance, to get more information about the `run` command:
+```bash
+$ seed help
+seed is a Fast  tool for managing your project.
+
+USAGE
+    seed command [arguments]
+
+AVAILABLE COMMANDS
+
+    version     Prints the current Seed version
+    httptest    set up a http server for test
+    new         Creates a  app for template
+    validate    do code validate use gometalinter
+
+Use seed help [command] for more information about a command.
+
+ADDITIONAL HELP TOPICS
+
+
+Use seed help [topic] for more information about that topic.
+seed: Too many arguments.
+Use seed help for more information.
+
+```
+
+For instance, to get more information about the `new` command:
 
 ```bash
 $ seed help new
