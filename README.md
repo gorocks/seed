@@ -90,10 +90,12 @@ USAGE
 
 AVAILABLE COMMANDS
 
-    version     Prints the current Seed version
-    httptest    set up a http server for test
-    new         Creates a  app for template
-    validate    do code validate use gometalinter
+       version     Prints the current Seed version
+       gen         seed generator proto avro and db model
+       httptest    set up a http server for test
+       new         Creates a  app for template
+       validate    do code validate use gometalinter
+
 
 Use seed help [command] for more information about a command.
 
