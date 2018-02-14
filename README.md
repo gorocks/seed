@@ -16,9 +16,11 @@ go get github.com/Guazi-inc/seed
 seed provides a variety of commands which can be helpful at various stages of development. The top level commands include:
 
 ```
-    version     Prints the current seed version
-    new         Creates a  app for template
+    version     Prints the current Seed version
+    gen         seed generator proto avro and db model
     httptest    set up a http server for test
+    new         Creates a  app for template
+    validate    do code validate use gometalinter
 
 ```
 
