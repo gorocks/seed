@@ -36,6 +36,28 @@ func CheckGip() bool {
 	return true
 }
 
+//CheckProtoc returns whether protoc exists.
+func CheckProtoc() bool {
+	cmd := exec.Command("protoc", "--version")
+	bout := bytes.NewBuffer(nil)
+	cmd.Stdout = bout
+	if err := cmd.Run(); err != nil {
+		logger.Warnf("protoc can read https://github.com/golang/protobuf")
+		logger.Warnf("Error while running protoc: %s", err)
+		return false
+	}
+	logger.Infof("protoc local version is:%v", bout.String())
+	return true
+}
+
+func ProtocGenGo(protoPath, outPath, iPath string) {
+	cmd := exec.Command("protoc", protoPath, fmt.Sprintf("--go_out=plugins=grpc:%v", outPath), "-I", iPath)
+	if err := cmd.Run(); err != nil {
+		logger.Fatalf("Error while running protoc: %s", err)
+	}
+	logger.Successf("generator file %s", protoPath)
+}
+
 //DoGipInstall gip install from requirements.txt
 func DoGipInstall(requirementsPath string) {
 	cmd := exec.Command("gip", "install", "-v", requirementsPath)
@@ -444,7 +466,7 @@ func GetUsefulPath(path string, field string, isContaint bool) string {
 }
 
 func RmDuplicate(list []string) []string {
-	var x []string = []string{}
+	x := make([]string, 0)
 	for _, i := range list {
 		if len(x) == 0 {
 			x = append(x, i)

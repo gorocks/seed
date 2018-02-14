@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/Guazi-inc/seed/cmd/command"
+	_ "github.com/Guazi-inc/seed/cmd/command/generator"
 	_ "github.com/Guazi-inc/seed/cmd/command/httptest"
 	_ "github.com/Guazi-inc/seed/cmd/command/new"
 	_ "github.com/Guazi-inc/seed/cmd/command/validate"

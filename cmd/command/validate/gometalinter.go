@@ -5,6 +5,7 @@ import (
 
 	"github.com/Guazi-inc/seed/cmd/command"
 	"github.com/Guazi-inc/seed/cmd/command/version"
+	"github.com/Guazi-inc/seed/logger"
 	"github.com/Guazi-inc/seed/utils"
 )
 
@@ -32,6 +33,10 @@ func init() {
 }
 
 func doValidate(cmd *commands.Command, args []string) int {
+	if err := cmd.Flag.Parse(args); err != nil {
+		logger.Fatalf("Error while parsing flags: %v", err.Error())
+	}
+
 	if isInstall {
 		utils.InstallAndUpdateGometalinter()
 	}
