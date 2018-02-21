@@ -40,7 +40,6 @@ func Gen(cmd *commands.Command, args []string) int {
 	if err := cmd.Flag.Parse(args[1:]); err != nil {
 		logger.Fatalf("Error while parsing flags: %v", err.Error())
 	}
-	logger.Info(fPath)
 	if len(fPath) == 0 {
 		logger.Fatalf("Argument [p] is missing")
 	}
