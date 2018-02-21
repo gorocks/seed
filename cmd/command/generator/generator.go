@@ -16,8 +16,10 @@ import (
 var CmdGen = &commands.Command{
 	UsageLine: "gen [Command]",
 	Short:     "seed generator proto avro and db model",
-	Long: `
-can do generator groto avro db-model to go file.
+	Long: `The command 'gen' allows you to generator from file.
+
+  ▶ {{"To generator protobuf :"|bold}}
+    $ seed gen proto [-p] [-o]
 `,
 	PreRun: func(cmd *commands.Command, args []string) { version.ShowShortVersionBanner() },
 	Run:    Gen,
