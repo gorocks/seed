@@ -74,12 +74,15 @@ func genProto() {
 			return nil
 		}
 		if !strings.HasSuffix(path, ".proto") {
-			logger.Warnf("%s not proto file ", path)
+			//logger.Warnf("%s not proto file ", path)
 			return nil
 		}
 		arr := strings.Split(path, "/")
 		iPath := ""
 		for k, v := range arr {
+			if v == ".git" {
+				return nil
+			}
 			if v == "proto" {
 				iPath = strings.Join(arr[:k], "/")
 				break
