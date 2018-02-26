@@ -2,14 +2,13 @@ package new
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
+	"strings"
 	"testing"
 	tmp "text/template"
 
-	"strings"
-
 	"github.com/Guazi-inc/seed/cmd/command/generator/proto"
-	"github.com/gin-gonic/gin/json"
 )
 
 func TestCreateFile(t *testing.T) {

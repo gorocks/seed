@@ -70,7 +70,7 @@ func genProto() {
 	if outPath == "" {
 		outPath = gopath + "/src"
 	}
-	logger.Infof("out_put_file_path:%s", outPath)
+	logger.Infof("out_put_file_path: %s", outPath)
 	filepath.Walk(fPath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
