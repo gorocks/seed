@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	tmp "text/template"
@@ -81,5 +82,49 @@ func (s *{{$.ServiceName}}) {{.FunName}}(ctx context.Context, in *{{ tmp .Reques
 		}
 		//建立某一个service的文件
 		log.Println(content.String())
+	}
+}
+
+func Test_isNetZip(t *testing.T) {
+	type args struct {
+		b []byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"t1", args{[]byte("https://github.com/Guazi-inc/seed/archive/master.zip")}, true},
+		{"t2", args{[]byte("master.zip")}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isNetZip(tt.args.b); got != tt.want {
+				t.Errorf("isNetZip() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_parseZip(t *testing.T) {
+	tf := tempFileName()
+	type args struct {
+		url    string
+		toPath string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"t1", args{"https://github.com/Guazi-inc/seed/archive/master.zip", tf}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := parseZip(tt.args.url, tt.args.toPath); (err != nil) != tt.wantErr {
+				t.Errorf("parseZip() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			defer os.RemoveAll(tf)
+		})
 	}
 }
